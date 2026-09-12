@@ -15,5 +15,8 @@ models/
 *.wav
 *.mp3
 *.mp4
+*.webm
+*.pth
+*.safetensors
 *.trec
 *.7z
