@@ -21,6 +21,7 @@ def main():
     parser.add_argument('--threads', type=int, default=8)
     parser.add_argument('--text-file', type=Path, default=ROOT / 'examples' / 'voice-test.txt')
     parser.add_argument('--audio-file', type=Path, help='Alternative local recording of the consenting owner')
+    parser.add_argument('--by-line', action='store_true', help='Synthesize short lines independently with inspectable boundaries')
     args = parser.parse_args()
     if args.start < 0 or not 3 <= args.seconds <= 30 or args.threads < 1:
         parser.error('start >= 0, seconds in [3,30], threads >= 1 required')
@@ -71,8 +72,38 @@ def main():
             raise ValueError('Empty test text')
         destination = output / 'synthesized.wav'
         started = time.perf_counter()
-        engine.tts_to_file(text=text, speaker_wav=str(reference), language='ru',
-                           file_path=str(destination), split_sentences=True)
+        if args.by_line:
+            import numpy as np
+            lines = [line.strip() for line in text.splitlines() if line.strip()]
+            if any(len(line) > 180 for line in lines):
+                raise ValueError('Split long lines at a natural sentence boundary (max 180 characters)')
+            combined, boundaries = [], []
+            cursor = 0
+            for index, line in enumerate(lines):
+                part = output / f'sentence-{index+1:02d}.wav'
+                engine.tts_to_file(text=line, speaker_wav=str(reference), language='ru',
+                                  file_path=str(part), split_sentences=False)
+                samples, rate = sf.read(part)
+                if rate != 24000 or samples.ndim != 1:
+                    raise ValueError('Unexpected XTTS audio format')
+                # Short boundary fades prevent splice clicks, not model voice artifacts.
+                fade = min(round(rate * 0.01), len(samples) // 2)
+                if fade:
+                    samples[:fade] *= np.linspace(0, 1, fade)
+                    samples[-fade:] *= np.linspace(1, 0, fade)
+                boundaries.append({'text': line, 'start': cursor/rate,
+                                   'end': (cursor+len(samples))/rate, 'rawAudio': str(part)})
+                combined.append(samples)
+                cursor += len(samples)
+                if index < len(lines)-1:
+                    silence = np.zeros(round(rate * 0.25))
+                    combined.append(silence)
+                    cursor += len(silence)
+            sf.write(destination, np.concatenate(combined), 24000, subtype='PCM_24')
+            report['sentences'] = boundaries
+        else:
+            engine.tts_to_file(text=text, speaker_wav=str(reference), language='ru',
+                               file_path=str(destination), split_sentences=True)
         report['synthesisSeconds'] = time.perf_counter() - started
         report['audioDurationSeconds'] = sf.info(destination).duration
         report['realTimeFactor'] = report['synthesisSeconds'] / report['audioDurationSeconds']
