@@ -1,4 +1,10 @@
 node_modules/
+.venv/
+.cache/
+__pycache__/
+*.pyc
+*.m4a
+*.zip
 .env
 .env.*
 !.env.example

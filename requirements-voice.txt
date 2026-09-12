@@ -1,0 +1,5 @@
+# Install CPU torch/torchaudio first from the official PyTorch CPU index.
+coqui-tts==0.27.5
+transformers>=4.57,<5
+imageio-ffmpeg==0.6.0
+soundfile>=0.13,<0.14
