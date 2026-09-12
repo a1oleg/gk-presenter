@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "title": "Демонстрация контракта — не реальный сценарий",
+  "profile": {
+    "language": "ru",
+    "audience": "Разработчики, впервые знакомящиеся с проектом",
+    "style": "Причина → действие → результат; без пересказа синтаксиса",
+    "avoid": ["неподтверждённые утверждения", "избыточный жаргон"]
+  },
+  "evidence": [
+    {"id": "e1", "kind": "code", "locator": "fixture://example.ts:1", "revision": "example-only", "excerpt": "const selected = state => state.value;"}
+  ],
+  "claims": [
+    {"id": "c1", "text": "В примере выбирается одно поле состояния.", "evidenceIds": ["e1"]}
+  ],
+  "segments": [
+    {
+      "id": "s1",
+      "narration": "Здесь мы берём только нужное поле состояния.",
+      "claimIds": ["c1"],
+      "targetSeconds": 6,
+      "visual": {"kind": "code", "evidenceIds": ["e1"], "instruction": "Выделить обращение к полю value."}
+    }
+  ],
+  "pronunciations": {}
+}

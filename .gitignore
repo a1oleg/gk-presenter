@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.*
+!.env.example
+data/
+output/
+models/
+*.local.json
+*.wav
+*.mp3
+*.mp4
+*.trec
+*.7z

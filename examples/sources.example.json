@@ -1,0 +1,10 @@
+{
+  "videoPath": null,
+  "audioPath": null,
+  "audioOffsetSeconds": null,
+  "codeRoot": null,
+  "codeRevision": null,
+  "orchestratorBaseUrl": null,
+  "voiceConsent": false,
+  "allowCloudUpload": false
+}
