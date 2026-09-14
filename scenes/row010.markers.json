@@ -1,0 +1,16 @@
+{
+  "sheetRow": 10,
+  "sceneCell": "!B10",
+  "cursorCell": "!C10",
+  "pointer": "red-arrow",
+  "transitionSeconds": 0.65,
+  "coordinateSpace": "Original screenshot pixels, 1600 x 900",
+  "markers": [
+    {"anchor": "цикла for", "screenPosition": [195, 231], "meaning": "Начало цикла for"},
+    {"anchor": "условные ветвления показаны гексами", "screenPosition": [350, 302], "meaning": "Гекс условия current.index > 0"},
+    {"anchor": "две исходящие связи", "screenPosition": [372, 333], "meaning": "Выход true вниз, false влево от условия"},
+    {"anchor": "проверяется не достиг ли он конца", "screenPosition": [404, 302], "meaning": "Проверка current.index > 0"},
+    {"anchor": "ветка исполнения уходит влево", "screenPosition": [243, 303], "meaning": "Левая ветка false"},
+    {"anchor": "перемешанный алфавит возвращается", "screenPosition": [204, 814], "meaning": "Возврат alphabet после выхода из цикла"}
+  ]
+}
