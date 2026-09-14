@@ -1,0 +1,15 @@
+{
+  "sheetRow": 4,
+  "sceneCell": "!B4",
+  "pointer": "red-arrow",
+  "transitionSeconds": 0.65,
+  "coordinateSpace": "Original screenshot pixels, 1600 x 900; diagram left, source right",
+  "markers": [
+    {"anchor": "в граф и в диаграмму", "screenPosition": [142, 260], "meaning": "Начало диаграммы в левой панели"},
+    {"anchor": "код, реализующий", "screenPosition": [989, 224], "meaning": "Функция shuffle в правой панели"},
+    {"anchor": "алгоритм Фишера-Йетса", "screenPosition": [967, 192], "meaning": "Название алгоритма в исходнике"},
+    {"anchor": "Сначала создаётся массив alphabet", "screenPosition": [873, 365], "meaning": "Объявление массива alphabet"},
+    {"anchor": "первые восемь букв английского алфавита", "screenPosition": [373, 475], "meaning": "Значения A–H в инициализации массива на диаграмме"},
+    {"anchor": "Их перемешанный порядок", "screenPosition": [1185, 391], "meaning": "Комментарий с примером перемешанного результата в исходнике"}
+  ]
+}

@@ -2,7 +2,7 @@
 
 Run with google-sheets-mcp's Python. No automatic paid retries.
 """
-import asyncio,base64,json,sys,time,urllib.request,urllib.error
+import argparse,asyncio,base64,json,sys,time,urllib.request,urllib.error
 from pathlib import Path
 from mcp import ClientSession,StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -10,22 +10,33 @@ from mcp.client.stdio import stdio_client
 ROOT=Path(__file__).resolve().parents[1]
 SID='1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
 SHEETS=ROOT.parent/'google-sheets-mcp'
+parser=argparse.ArgumentParser()
+parser.add_argument('--row',type=int,default=3)
+parser.add_argument('--audio-only',action='store_true')
+parser.add_argument('--audio-column',choices=['B','C','D'],default='B')
+args=parser.parse_args()
+if args.row<2: parser.error('row must be at least 2')
+notation=f'!A{args.row-1}:{"E" if args.audio_column=="D" else "C"}{args.row+1}'
 
 async def main():
  async with stdio_client(StdioServerParameters(command=str(SHEETS/'.venv/Scripts/python.exe'),args=[str(SHEETS/'server.py')])) as (r,w):
   async with ClientSession(r,w) as client:
    await client.initialize()
-   result=await client.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':SID,'notation':'!A2:C4'})
+   result=await client.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':SID,'notation':notation})
    if result.isError: raise RuntimeError(str(result.content))
    data=json.loads(result.content[0].text)
    rows=data['values']
    previous,text,following=rows[0][0],rows[1][0],rows[2][0]
-   assert not rows[1][1], 'B3 already populated; inspect before generating again'
-   scene=Path(rows[1][2]); assert scene.is_file() and scene.suffix=='.drawio'
-   out=ROOT/'output'/f'scene-row003-{time.time_ns()}'
+   audio_index=ord(args.audio_column)-ord('A')
+   assert len(rows[1])<=audio_index or not rows[1][audio_index], f'{args.audio_column}{args.row} already populated; inspect before generating again'
+   assert text.strip(), 'Empty narration'
+   scene=None
+   if not args.audio_only:
+    scene=Path(rows[1][2]); assert scene.is_file() and scene.suffix=='.drawio'
+   out=ROOT/'output'/f'scene-row{args.row:03d}-{time.time_ns()}'
    out.mkdir()
    (out/'sheet-source.json').write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8')
-   (out/'source.drawio').write_bytes(scene.read_bytes())
+   if scene: (out/'source.drawio').write_bytes(scene.read_bytes())
    entries=dict(line.split('=',1) for line in (ROOT/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in line and not line.lstrip().startswith('#'))
    key=entries['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")
    voice=json.loads((ROOT/'output/elevenlabs-maono-new-clone.local.json').read_text())['voice_id']
@@ -43,11 +54,11 @@ async def main():
    audio=out/'speech.mp3'
    audio.write_bytes(base64.b64decode(reply.pop('audio_base64')))
    (out/'alignment.json').write_text(json.dumps(reply,ensure_ascii=False,indent=2),encoding='utf-8')
-   report={'audio':str(audio),'scene':str(scene),'output':str(out),'characterCost':cost,'requestId':request_id,'characters':len(text)}
+   report={'audio':str(audio),'scene':str(scene) if scene else None,'output':str(out),'characterCost':cost,'requestId':request_id,'characters':len(text)}
    (out/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
-   current=await client.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':SID,'notation':'!A2:C4'})
-   if json.loads(current.content[0].text)['values']!=rows: raise SystemExit('Sheet changed: audio saved; B3 not overwritten')
-   result=await client.call_tool('update_cells',{'spreadsheet_id':SID,'range_a1':"'"+data['sheetTitle'].replace("'","''")+"'!B3",'values_json':json.dumps([[str(audio)]]),'value_input_option':'RAW'})
+   current=await client.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':SID,'notation':notation})
+   if json.loads(current.content[0].text)['values']!=rows: raise SystemExit(f'Sheet changed: audio saved; {args.audio_column}{args.row} not overwritten')
+   result=await client.call_tool('update_cells',{'spreadsheet_id':SID,'range_a1':"'"+data['sheetTitle'].replace("'","''")+f"'!{args.audio_column}{args.row}",'values_json':json.dumps([[str(audio)]]),'value_input_option':'RAW'})
    if result.isError: raise RuntimeError(str(result.content))
    print(json.dumps(report),flush=True)
 

@@ -1,0 +1,17 @@
+{
+  "sheetRow": 7,
+  "sceneCell": "!B7",
+  "cursorCell": "!C7",
+  "pointer": "red-arrow",
+  "transitionSeconds": 0.65,
+  "coordinateSpace": "Original screenshot pixels, 1600 x 900",
+  "markers": [
+    {"anchor": "Переменные на диаграмме", "screenPosition": [119, 654], "meaning": "Коробка переменной current"},
+    {"anchor": "коллекции и массивы", "screenPosition": [118, 432], "meaning": "Штабель массива alphabet"},
+    {"anchor": "Открытые штабеля", "screenPosition": [125, 390], "meaning": "Открытый верх штабеля alphabet"},
+    {"anchor": "и коробки означают", "screenPosition": [123, 638], "meaning": "Открытый верх коробки current"},
+    {"anchor": "тут она создаётся или декларируется", "screenPosition": [842, 363], "meaning": "Объявление alphabet в исходнике"}
+  ],
+  "hideAt": "В упрощённом виде",
+  "hideReason": "Упрощённые жёлтые плитки на указанном кадре не представлены; не указывать на другой тип объекта."
+}

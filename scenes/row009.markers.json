@@ -1,0 +1,18 @@
+{
+  "sheetRow": 9,
+  "sceneCell": "!B9",
+  "cursorCell": "!C9",
+  "pointer": "red-arrow",
+  "transitionSeconds": 0.65,
+  "coordinateSpace": "Original screenshot pixels, 1600 x 900",
+  "markers": [
+    {"anchor": "фигурные скобки", "screenPosition": [194, 691], "meaning": "Открывающая фигурная скобка объекта на диаграмме"},
+    {"anchor": "поля по вертикали", "screenPosition": [253, 735], "meaning": "Нижнее поле value под полем index"},
+    {"anchor": "объекту current", "screenPosition": [119, 655], "meaning": "Коробка current"},
+    {"anchor": "в поле index", "screenPosition": [249, 646], "meaning": "Поле index на диаграмме"},
+    {"anchor": "длину нашего алфавита", "screenPosition": [383, 680], "meaning": "alphabet.length в мозаике значения index"},
+    {"anchor": "вычитая 1", "screenPosition": [441, 680], "meaning": "Вычитание единицы из длины"},
+    {"anchor": "А поле value", "screenPosition": [252, 735], "meaning": "Поле value"},
+    {"anchor": "undefined", "screenPosition": [371, 735], "meaning": "Значение undefined в поле value"}
+  ]
+}
