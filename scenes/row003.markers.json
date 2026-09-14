@@ -1,0 +1,14 @@
+{
+  "sheetRow": 3,
+  "sceneCell": "!C3",
+  "pointer": "red-arrow",
+  "transitionSeconds": 0.6,
+  "markers": [
+    {"anchor": "из исходного кода", "cellId": "327", "position": [0.75, 0.4], "meaning": "Исходный код"},
+    {"anchor": "нужные сущности и связи", "cellId": "401", "routeFraction": 0.5, "meaning": "Извлечение сущностей и связей"},
+    {"anchor": "преобразуют", "cellId": "401", "routeFraction": 0.95, "meaning": "Перенос извлечённого в граф"},
+    {"anchor": "в граф", "cellId": "330", "position": [0.65, 0.55], "meaning": "Граф в Neo4j"},
+    {"anchor": "а потом создают", "cellId": "407", "routeFraction": 0.5, "meaning": "Построение диаграммы из графа"},
+    {"anchor": "диаграмму", "cellId": "331", "position": [0.65, 0.45], "meaning": "Диаграмма draw.io"}
+  ]
+}

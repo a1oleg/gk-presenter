@@ -1,0 +1,72 @@
+// Export an unchanged draw.io scene and coordinates for narration targets.
+// Geometry comes from the real draw.io engine/MCP, not screenshot inference.
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath,pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const inspector=path.resolve(root,'../drawio-inspector');
+const require=createRequire(path.join(inspector,'package.json'));
+const {chromium}=require('playwright');
+const {Client}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/sdk/client/index.js')));
+const {StdioClientTransport}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/sdk/client/stdio.js')));
+const {resolveViewer}=await import(pathToFileURL(path.join(inspector,'src/render.mjs')));
+const out=path.resolve(process.argv[2]);
+const file=path.join(out,'source.drawio');
+const client=new Client({name:'presenter-scene',version:'1.0.0'});
+try {
+ await client.connect(new StdioClientTransport({command:process.execPath,args:[path.join(inspector,'src/mcp.mjs')]}));
+ for(const [name,args] of [['inspect_region',{cellId:'228',padding:10000}],['validate_geometry',{}]]) {
+  const r=await client.callTool({name,arguments:{file,mode:'rendered',limit:500,...args}},undefined,{timeout:180000});
+  if(r.isError)throw Error(JSON.stringify(r.content));
+  await fs.writeFile(path.join(out,`${name}.json`),JSON.stringify(r.structuredContent,null,2));
+  console.log(name,JSON.stringify(name==='inspect_region'?{count:r.structuredContent.elements.length}:r.structuredContent));
+ }
+}finally{await client.close();}
+let xml=await fs.readFile(file,'utf8');
+const assets=[];
+for(const url of new Set([...xml.matchAll(/image=(https?:[^;]+);/g)].map(m=>m[1]))) {
+ const response=await fetch(url,{signal:AbortSignal.timeout(30000)});
+ if(!response.ok)throw Error(`Asset ${response.status}: ${url}`);
+ const bytes=Buffer.from(await response.arrayBuffer());
+ const mime=(response.headers.get('content-type')||'').split(';')[0];
+ if(!mime.startsWith('image/'))throw Error('Not an image: '+url);
+ const data=`data:${mime},${bytes.toString('base64')}`;
+ xml=xml.replaceAll('image='+url+';','image='+data+';');
+ assets.push({url,mime,bytes:bytes.length});
+}
+await fs.writeFile(path.join(out,'assets.json'),JSON.stringify(assets,null,2));
+const browser=await chromium.launch({channel:'chrome',headless:true});
+try{
+ const ctx=await browser.newContext({viewport:{width:1600,height:900},deviceScaleFactor:1,serviceWorkers:'block'});
+ await ctx.route('**/*',r=>r.abort());
+ const page=await ctx.newPage();
+ await page.setContent('<html><body style="margin:0;overflow:hidden;background:white"><div id="graph" style="width:1600px;height:900px"></div></body></html>');
+ await page.addScriptTag({path:await resolveViewer()});
+ const geometry=await page.evaluate(async xml=>{
+  const graph=new Graph(document.getElementById('graph'));graph.setEnabled(false);
+  const doc=mxUtils.parseXml(xml);
+  new mxCodec(doc).decode(doc.getElementsByTagName('mxGraphModel')[0],graph.getModel());
+  graph.getView().scaleAndTranslate(1,0,0);graph.getView().validate();
+  // Fit visible content, not unused editor page margins; preserve all relative positions.
+  const b=graph.getGraphBounds();
+  const scale=Math.min(1440/b.width,700/b.height);
+  const tx=(1600/scale-b.width)/2-b.x,ty=(900/scale-b.height)/2-b.y;
+  graph.getView().scaleAndTranslate(scale,tx,ty);graph.getView().validate();
+  await document.fonts.ready;
+  await Promise.all([...document.querySelectorAll('image')].map(e=>new Promise((res,rej)=>{
+   const img=new Image();img.onload=res;img.onerror=()=>rej(Error('Image decode failed'));
+   img.src=e.getAttribute('href')||e.getAttribute('xlink:href');
+  })));
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  const cells={};
+  for(const cell of Object.values(graph.getModel().cells)){
+   const s=graph.getView().getState(cell);if(!s)continue;
+   cells[cell.id]={x:s.x,y:s.y,width:s.width,height:s.height,edge:!!cell.edge,points:s.absolutePoints?.filter(Boolean).map(p=>({x:p.x,y:p.y}))};
+  }
+  return{width:1600,height:900,scale,translation:{x:tx,y:ty},cells};
+ },xml);
+ await fs.writeFile(path.join(out,'screen-geometry.json'),JSON.stringify(geometry,null,2));
+ await page.screenshot({path:path.join(out,'scene.png')});
+ console.log('Scene exported, objects:',Object.keys(geometry.cells).length);
+}finally{await browser.close();}
