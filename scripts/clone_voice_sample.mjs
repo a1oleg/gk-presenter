@@ -1,0 +1,34 @@
+// Create a separate IVC voice, then reuse an existing narration request for comparison.
+// No automatic retries: an ambiguous response must be checked before running again.
+import fs from 'node:fs/promises';
+import crypto from 'node:crypto';
+import path from 'node:path';
+const [samplePath,referenceRequest,customName] = process.argv.slice(2);
+if(!samplePath || !referenceRequest) throw new Error('Usage: node scripts/clone_voice_sample.mjs SAMPLE REFERENCE_REQUEST');
+const root=path.resolve(import.meta.dirname,'..');
+const entries=(await fs.readFile(path.join(root,'.env'),'utf8')).split(/\r?\n/);
+const entry=entries.find(line=>line.startsWith('ELEVENLABS_API_KEY='));
+const key=entry?.slice(entry.indexOf('=')+1).trim().replace(/^["']|["']$/g,'');
+if(!key)throw new Error('API key missing');
+const sample=await fs.readFile(samplePath);
+const out=path.join(root,'output',`${customName ? 'voice-mix-comparison' : 'voice2-comparison'}-${Date.now()}`);
+await fs.mkdir(out);
+const name=customName || 'Oleg - Voice 2 - recording 2';
+const form=new FormData();form.append('name',name);form.append('description','User-authorized voice comparison; existing voices preserved.');form.append('remove_background_noise','false');form.append('files',new Blob([sample],{type:path.extname(samplePath)==='.wav'?'audio/wav':'audio/mp4'}),path.basename(samplePath));
+console.log('OUTPUT='+out);
+const created=await fetch('https://api.elevenlabs.io/v1/voices/add',{method:'POST',headers:{'xi-api-key':key},body:form,signal:AbortSignal.timeout(120000)});
+if(!created.ok)throw new Error(`Voice creation HTTP ${created.status}: ${(await created.text()).replaceAll(key,'[REDACTED]').slice(0,600)}`);
+const voice=await created.json();
+await fs.writeFile(path.join(out,'voice.local.json'),JSON.stringify({...voice,name,samplePath,sampleSha256:crypto.createHash('sha256').update(sample).digest('hex')},null,2));
+console.log(JSON.stringify({name,...voice}));
+if(voice.requires_verification)throw new Error('Voice verification required; synthesis not attempted');
+const original=JSON.parse(await fs.readFile(referenceRequest,'utf8'));
+const {voice_id:oldVoice,...payload}=original;
+await fs.writeFile(path.join(out,'request.json'),JSON.stringify({voice_id:voice.voice_id,...payload},null,2));
+const response=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice.voice_id}/with-timestamps?output_format=mp3_44100_128`,{method:'POST',headers:{'xi-api-key':key,'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(120000)});
+if(!response.ok)throw new Error(`TTS HTTP ${response.status}: ${(await response.text()).replaceAll(key,'[REDACTED]').slice(0,600)}`);
+const reply=await response.json();
+await fs.writeFile(path.join(out,'speech.mp3'),Buffer.from(reply.audio_base64,'base64'));delete reply.audio_base64;
+await fs.writeFile(path.join(out,'alignment.json'),JSON.stringify(reply,null,2));
+const report={voiceId:voice.voice_id,name,audio:path.join(out,'speech.mp3'),referenceRequest,originalVoiceId:oldVoice,characterCost:response.headers.get('character-cost'),requestId:response.headers.get('request-id'),characters:payload.text.length};
+await fs.writeFile(path.join(out,'report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report));

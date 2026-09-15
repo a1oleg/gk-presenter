@@ -13,11 +13,13 @@ SHEETS=ROOT.parent/'google-sheets-mcp'
 parser=argparse.ArgumentParser()
 parser.add_argument('--row',type=int,default=3)
 parser.add_argument('--audio-only',action='store_true')
+parser.add_argument('--voice-file',type=Path,default=ROOT/'output/elevenlabs-maono-new-clone.local.json')
 parser.add_argument('--text-file',type=Path,help='Explicit spoken-text override; sheet snapshot is still preserved and guarded')
-parser.add_argument('--audio-column',choices=['B','C','D'],default='B')
+parser.add_argument('--audio-column',choices=['B','C','D','E','F'],default='B')
+parser.add_argument('--replace-audio',type=Path,help='Allow replacing only this exact existing audio link')
 args=parser.parse_args()
 if args.row<2: parser.error('row must be at least 2')
-notation=f'!A{args.row-1}:{"E" if args.audio_column=="D" else "C"}{args.row+1}'
+notation=f'!A{args.row-1}:{chr(max(ord("C"),ord(args.audio_column)+1))}{args.row+1}'
 
 async def main():
  async with stdio_client(StdioServerParameters(command=str(SHEETS/'.venv/Scripts/python.exe'),args=[str(SHEETS/'server.py')])) as (r,w):
@@ -30,7 +32,7 @@ async def main():
    previous,text,following=rows[0][0],rows[1][0],rows[2][0]
    if args.text_file: text=args.text_file.read_text(encoding='utf-8-sig').strip()
    audio_index=ord(args.audio_column)-ord('A')
-   assert len(rows[1])<=audio_index or not rows[1][audio_index], f'{args.audio_column}{args.row} already populated; inspect before generating again'
+   assert len(rows[1])<=audio_index or not rows[1][audio_index] or (args.replace_audio and Path(rows[1][audio_index]).resolve()==args.replace_audio.resolve()), f'{args.audio_column}{args.row} already populated; inspect before generating again'
    assert text.strip(), 'Empty narration'
    scene=None
    if not args.audio_only:
@@ -41,7 +43,7 @@ async def main():
    if scene: (out/'source.drawio').write_bytes(scene.read_bytes())
    entries=dict(line.split('=',1) for line in (ROOT/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in line and not line.lstrip().startswith('#'))
    key=entries['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")
-   voice=json.loads((ROOT/'output/elevenlabs-maono-new-clone.local.json').read_text())['voice_id']
+   voice=json.loads(args.voice_file.read_text(encoding='utf-8'))['voice_id']
    payload={'text':text,'previous_text':previous,'next_text':following,'model_id':'eleven_multilingual_v2','voice_settings':{'stability':0.5,'similarity_boost':1.0,'style':0,'use_speaker_boost':True}}
    (out/'request.json').write_text(json.dumps({'voice_id':voice,**payload},ensure_ascii=False,indent=2),encoding='utf-8')
    print('OUTPUT='+str(out),flush=True)

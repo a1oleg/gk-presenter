@@ -1,0 +1,29 @@
+{
+  "sheetRow": 13,
+  "sceneCell": "!B13",
+  "cursorCell": "!C13",
+  "interactiveCell": "!D13",
+  "pointer": "red-arrow",
+  "transitionSeconds": 0.65,
+  "coordinateSpace": "Original screenshot pixels, 1600 x 900",
+  "markers": [
+    {"anchor":"Выполняем перебор", "screenPosition":[208,310], "meaning":"Условие цикла current.index > 0"},
+    {"anchor":"Начинаем с индекса 7", "screenPosition":[707,516], "meaning":"Индекс 7 в первом проходе"},
+    {"anchor":"из alphabet", "screenPosition":[316,410], "meaning":"Чтение массива alphabet"},
+    {"anchor":"в поле value", "screenPosition":[785,516], "meaning":"Первый current.value равен H"},
+    {"anchor":"Далее вычисляем рандом", "screenPosition":[308,520], "meaning":"Вызов getRandom"},
+    {"anchor":"актуальный размер перемешиваемого", "screenPosition":[387,520], "meaning":"Аргумент current.index + 1"},
+    {"anchor":"вернула нам четвёрку", "screenPosition":[934,516], "meaning":"random = 4 в первом проходе"},
+    {"anchor":"функцию swap", "screenPosition":[208,646], "meaning":"Вызов swap с alphabet, current и random"},
+    {"anchor":"поставит в конец", "screenPosition":[1293,516], "meaning":"E в конце массива после первого обмена"},
+    {"anchor":"запишет на её место", "screenPosition":[1188,516], "meaning":"H на индексе 4 после первого обмена"},
+    {"anchor":"current index уменьшается", "screenPosition":[226,799], "meaning":"Декремент current.index"},
+    {"anchor":"цикл повторяется", "screenPosition":[474,610], "meaning":"Возврат по связи repeat"},
+    {"anchor":"По индексу 6", "screenPosition":[706,559], "meaning":"Индекс 6 во втором проходе"},
+    {"anchor":"предпоследняя", "screenPosition":[811,559], "meaning":"current.value = G"},
+    {"anchor":"рандом вернул ноль", "screenPosition":[934,559], "meaning":"random = 0 во втором проходе"},
+    {"anchor":"самый первый слот массива", "screenPosition":[1057,559], "meaning":"G в первом слоте после обмена"},
+    {"anchor":"меняется местами с", "screenPosition":[1258,559], "meaning":"A переходит на индекс 6"},
+    {"anchor":"полностью перемешанный алфавит", "screenPosition":[1165,820], "meaning":"Итоговый массив в последней строке"}
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "sheetRow": 8,
+  "sceneCell": "!B8",
+  "cursorCell": "!C8",
+  "pointer": "red-arrow",
+  "transitionSeconds": 0.65,
+  "coordinateSpace": "Original screenshot pixels, 1600 x 900",
+  "hideAt": "В упрощённом виде",
+  "hideReason": "В этом кадре отсутствуют упрощённые жёлтые плитки; указка скрывается на их описании.",
+  "markers": [
+    {"anchor":"в виде коробок", "screenPosition":[120,600], "meaning":"Коробка current"},
+    {"anchor":"коллекции и массивы", "screenPosition":[120,412], "meaning":"Штабель alphabet"},
+    {"anchor":"Открытые штабеля", "screenPosition":[123,381], "meaning":"Открытый верх alphabet"},
+    {"anchor":"и коробки означают", "screenPosition":[122,584], "meaning":"Открытый верх current"},
+    {"anchor":"создаётся или декларируется", "screenPosition":[720,574], "meaning":"Объявление current в коде"}
+  ]
+}

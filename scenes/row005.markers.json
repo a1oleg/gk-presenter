@@ -1,0 +1,16 @@
+{
+  "sheetRow": 5,
+  "sceneCell": "!B5",
+  "cursorCell": "!C5",
+  "interactiveCell": "!D5",
+  "pointer": "red-arrow",
+  "transitionSeconds": 0.65,
+  "coordinateSpace": "Original screenshot pixels, 1600 x 900",
+  "markers": [
+    {"anchor":"код алгоритма Фишера-Йетса", "screenPosition":[821,259], "meaning":"Функция shuffle в исходнике"},
+    {"anchor":"меняет порядок элементов коллекции", "screenPosition":[1050,431], "meaning":"Пример перемешанного результата в комментарии"},
+    {"anchor":"создадим массив alphabet", "screenPosition":[746,402], "meaning":"Объявление alphabet в коде"},
+    {"anchor":"первых восьми букв алфавита", "screenPosition":[1050,402], "meaning":"Литерал массива из восьми букв"},
+    {"anchor":"Их перемешанный порядок", "screenPosition":[1050,431], "meaning":"Ожидаемый результат shuffle"}
+  ]
+}
