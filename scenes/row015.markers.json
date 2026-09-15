@@ -1,0 +1,16 @@
+{
+  "sheetRow": 15,
+  "sceneCell": "!B15",
+  "pointer": "red-arrow",
+  "transitionSeconds": 0.65,
+  "markers": [
+    {"anchor": "при сборке проекта", "cellId": "374", "position": [0.75, 0.65]},
+    {"anchor": "в код внедряется логирование", "cellId": "376", "position": [0.8, 0.6]},
+    {"anchor": "на этапе экстракции", "cellId": "390", "position": [0.8, 0.6]},
+    {"anchor": "размечается в графе", "cellId": "228", "position": [0.8, 0.6]},
+    {"anchor": "В демонстрационном проекте", "cellId": "382", "position": [0.8, 0.6]},
+    {"anchor": "Redis", "cellId": "368", "position": [0.8, 0.7]},
+    {"anchor": "Расширение VS Code", "cellId": "364", "position": [0.8, 0.65]},
+    {"anchor": "отображает трассы на диаграмме", "cellId": "367", "position": [0.8, 0.65]}
+  ]
+}

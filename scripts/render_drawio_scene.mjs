@@ -31,11 +31,21 @@ for(const url of new Set([...xml.matchAll(/image=(https?:[^;]+);/g)].map(m=>m[1]
  const bytes=Buffer.from(await response.arrayBuffer());
  const mime=(response.headers.get('content-type')||'').split(';')[0];
  if(!mime.startsWith('image/'))throw Error('Not an image: '+url);
- const data=`data:${mime},${bytes.toString('base64')}`;
+ const data=mime==='image/svg+xml'?`data:${mime},${encodeURIComponent(bytes.toString('utf8'))}`:`data:${mime},${bytes.toString('base64')}`;
  xml=xml.replaceAll('image='+url+';','image='+data+';');
  assets.push({url,mime,bytes:bytes.length});
 }
 await fs.writeFile(path.join(out,'assets.json'),JSON.stringify(assets,null,2));
+// Built-in draw.io clipart is relative to the webapp, not to about:blank.
+for(const relative of new Set([...xml.matchAll(/image=(img\/[^;"]+)(?=;|")/g)].map(m=>m[1]))) {
+ const webapp=path.resolve(root,'../coldKode/graph/vendor/drawio/src/main/webapp');
+ const local=path.resolve(webapp,relative);
+ if(!local.startsWith(webapp+path.sep))throw Error('Asset outside draw.io webapp');
+ const bytes=await fs.readFile(local);
+ const mime=relative.endsWith('.svg')?'image/svg+xml':'image/png';
+ const data=mime==='image/svg+xml'?`data:${mime},${encodeURIComponent(bytes.toString('utf8'))}`:`data:${mime},${bytes.toString('base64')}`;
+ xml=xml.replaceAll('image='+relative,'image='+data);
+}
 const browser=await chromium.launch({channel:'chrome',headless:true});
 try{
  const ctx=await browser.newContext({viewport:{width:1600,height:900},deviceScaleFactor:1,serviceWorkers:'block'});
@@ -55,7 +65,7 @@ try{
   graph.getView().scaleAndTranslate(scale,tx,ty);graph.getView().validate();
   await document.fonts.ready;
   await Promise.all([...document.querySelectorAll('image')].map(e=>new Promise((res,rej)=>{
-   const img=new Image();img.onload=res;img.onerror=()=>rej(Error('Image decode failed'));
+   const img=new Image();img.onload=res;img.onerror=()=>rej(Error('Image decode failed: '+img.src.slice(0,160)));
    img.src=e.getAttribute('href')||e.getAttribute('xlink:href');
   })));
   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));

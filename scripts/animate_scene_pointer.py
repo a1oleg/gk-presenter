@@ -13,6 +13,7 @@ parser=argparse.ArgumentParser()
 parser.add_argument('output',type=Path)
 parser.add_argument('--plan',type=Path,default=Path(__file__).resolve().parents[1]/'scenes/row003.markers.json')
 parser.add_argument('--background',type=Path,help='Use an unchanged screenshot instead of an exported draw.io scene')
+parser.add_argument('--source-drawio',type=Path,help='Original diagram for a separately exported scene')
 args=parser.parse_args();out=args.output
 plan=json.loads(args.plan.read_text(encoding='utf-8'))
 alignment=json.loads((out/'alignment.json').read_text(encoding='utf-8'))['alignment']
@@ -50,7 +51,7 @@ fps=30;frames=math.ceil((duration+0.3)*fps)
 for i,m in enumerate(markers):
     m['moveStart']=max(0,m['time']-plan['transitionSeconds'],markers[i-1]['time'] if i else 0)
     assert 0<=m['x']<geo['width']-50 and 0<=m['y']<geo['height']-65
-resolved={'text':text,'audioDuration':duration,'videoDuration':frames/fps,'fps':fps,'markers':markers,'timingSource':'ElevenLabs character alignment','coordinatesSource':'Authored screenshot pixel targets; no resizing' if args.background else 'draw.io rendered cell geometry; screenshot fit transform applied','sourceScene':str(args.background.resolve()) if args.background else json.loads((out/'report.json').read_text(encoding='utf-8'))['scene']}
+resolved={'text':text,'audioDuration':duration,'videoDuration':frames/fps,'fps':fps,'markers':markers,'timingSource':'ElevenLabs character alignment','coordinatesSource':'Authored screenshot pixel targets; no resizing' if args.background else 'draw.io rendered cell geometry; screenshot fit transform applied','sourceScene':str(args.background.resolve()) if args.background else str(args.source_drawio.resolve()) if args.source_drawio else json.loads((out/'report.json').read_text(encoding='utf-8'))['scene']}
 (out/'markers.json').write_text(json.dumps(resolved,ensure_ascii=False,indent=2),encoding='utf-8')
 if hide_at is not None:
     resolved['pointerHiddenFrom']=hide_at
