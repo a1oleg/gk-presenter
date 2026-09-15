@@ -1,10 +1,12 @@
 import fs from 'node:fs/promises';
 import {connectObs} from './obs_control.mjs';
 import {execFileSync} from 'node:child_process';
-const out = `C:/GitHub/coldKode-presenter/output/interactive-row011-${Date.now()}`;
+const currentRun=process.argv.includes('--current');
+const latest=currentRun?JSON.parse(await fs.readFile('C:/GitHub/coldKode/tmp/fisher-yates/runtime/latest.json','utf8')):null;
+const out = `C:/GitHub/coldKode-presenter/output/interactive-row${currentRun?'012':'011'}-${Date.now()}`;
 await fs.mkdir(out);
 const token = (await fs.readFile('C:/GitHub/coldKode/tmp/graph-demo-token.local','utf8')).trim();
-const functionStableId = 'examples/fisher-yates/src/shuffle.ts:6:7:36:1';
+const functionStableId = currentRun?latest.root:'examples/fisher-yates/src/shuffle.ts:6:7:36:1';
 const sleep = ms => new Promise(resolve=>setTimeout(resolve,ms));
 const events=[];
 let startedAt;
@@ -35,10 +37,10 @@ try {
   pointer('-Action','move','-X','470','-Y','904');
   await sleep(750);
   await demo({surface:'diagram',action:'menuClick',label});
-  await demo({surface:'runtime',action:'waitForAnalysis'});
+  await demo({surface:'runtime',action:'waitForAnalysis',...(currentRun?{sessionId:latest.sessionId}:{})});
   }
   await sleep(800);
-  pointer('-Action','drag','-X','1000','-Y','570','-TargetX','720','-TargetY','570');
+  pointer('-Action','drag','-X','1000','-Y','570','-TargetX',currentRun?'605':'720','-TargetY','570');
   events.push({time:(performance.now()-startedAt)/1000,input:{action:'panelExpanded'}});
   pointer('-Action','move','-X','1740','-Y','950');
   await sleep(22000);

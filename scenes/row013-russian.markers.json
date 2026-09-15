@@ -1,0 +1,25 @@
+{
+ "sheetRow":13,"sceneCell":"!B13","cursorCell":"!C13","pointer":"red-arrow","transitionSeconds":0.65,
+ "coordinateSpace":"Original screenshot pixels, 1600 x 900",
+ "markers":[
+  {"anchor":"Выполняем перебор","screenPosition":[195,321]},
+  {"anchor":"Начинаем с индекса 7","screenPosition":[701,516]},
+  {"anchor":"из alphabet","screenPosition":[302,421]},
+  {"anchor":"в поле value","screenPosition":[794,516]},
+  {"anchor":"Далее вычисляем рандом","screenPosition":[294,532]},
+  {"anchor":"актуальный размер","screenPosition":[376,532]},
+  {"anchor":"вернула нам тройку","screenPosition":[923,516]},
+  {"anchor":"функцию swap","screenPosition":[194,657]},
+  {"anchor":"поставит в конец","screenPosition":[1281,516]},
+  {"anchor":"запишет на её место","screenPosition":[1148,516]},
+  {"anchor":"current index уменьшается","screenPosition":[214,810]},
+  {"anchor":"цикл повторяется","screenPosition":[458,650]},
+  {"anchor":"По индексу 6","screenPosition":[702,559]},
+  {"anchor":"предпоследняя буква","screenPosition":[794,559]},
+  {"anchor":"Рандом вернул пятёрку","screenPosition":[923,559]},
+  {"anchor":"под индексом 5","screenPosition":[1218,559]},
+  {"anchor":"меняются местами","screenPosition":[1250,559]},
+  {"anchor":"больше не трогаем","screenPosition":[1282,559]},
+  {"anchor":"полностью перемешанный алфавит","screenPosition":[1167,820]}
+ ]
+}
