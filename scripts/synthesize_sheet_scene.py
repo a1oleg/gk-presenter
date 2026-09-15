@@ -13,6 +13,7 @@ SHEETS=ROOT.parent/'google-sheets-mcp'
 parser=argparse.ArgumentParser()
 parser.add_argument('--row',type=int,default=3)
 parser.add_argument('--audio-only',action='store_true')
+parser.add_argument('--text-file',type=Path,help='Explicit spoken-text override; sheet snapshot is still preserved and guarded')
 parser.add_argument('--audio-column',choices=['B','C','D'],default='B')
 args=parser.parse_args()
 if args.row<2: parser.error('row must be at least 2')
@@ -27,6 +28,7 @@ async def main():
    data=json.loads(result.content[0].text)
    rows=data['values']
    previous,text,following=rows[0][0],rows[1][0],rows[2][0]
+   if args.text_file: text=args.text_file.read_text(encoding='utf-8-sig').strip()
    audio_index=ord(args.audio_column)-ord('A')
    assert len(rows[1])<=audio_index or not rows[1][audio_index], f'{args.audio_column}{args.row} already populated; inspect before generating again'
    assert text.strip(), 'Empty narration'
