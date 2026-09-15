@@ -29,7 +29,8 @@ async def main():
    if result.isError: raise RuntimeError(str(result.content))
    data=json.loads(result.content[0].text)
    rows=data['values']
-   previous,text,following=rows[0][0],rows[1][0],rows[2][0]
+   previous,text=rows[0][0],rows[1][0]
+   following=rows[2][0] if len(rows)>2 and rows[2] else ''
    if args.text_file: text=args.text_file.read_text(encoding='utf-8-sig').strip()
    audio_index=ord(args.audio_column)-ord('A')
    assert len(rows[1])<=audio_index or not rows[1][audio_index] or (args.replace_audio and Path(rows[1][audio_index]).resolve()==args.replace_audio.resolve()), f'{args.audio_column}{args.row} already populated; inspect before generating again'
