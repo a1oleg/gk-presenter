@@ -1,0 +1,8 @@
+{
+  "transitionSeconds": 0.6,
+  "markers": [
+    {"anchor":"Теперь вторая ветка swap", "cellId":"n-8e8589fc3e84f22862228de0", "position":[0.85,0.85]},
+    {"anchor":"сохранение Аннотаций", "cellId":"snippet-random", "position":[0.05,1.05]},
+    {"anchor":"сначала аннотатор проверяет", "cellId":"n-29d9c6caab83f4738fb898b0", "position":[0.85,0.85]}
+  ]
+}

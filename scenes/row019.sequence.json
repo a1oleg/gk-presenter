@@ -1,0 +1,18 @@
+{
+  "transitionSeconds": 0.5,
+  "views": [
+    {"name":"detail","at":0},
+    {"name":"overview","anchor":"а после этого"},
+    {"name":"annotated","anchor":"сохранить её в граф"}
+  ],
+  "markers": [
+    {"view":"detail","anchor":"Начнём с getRandom","cellId":"f1-block","position":[0.5,0.05]},
+    {"view":"detail","anchor":"переданное число","cellId":"f1-n4-part-6","position":[0.5,1.25]},
+    {"view":"detail","anchor":"умножается","cellId":"f1-n4-part-5","position":[0.5,1.25]},
+    {"view":"detail","anchor":"Math.random","cellId":"f1-n4-part-4","position":[0.5,1.25]},
+    {"view":"detail","anchor":"floor округляет","cellId":"f1-n4-part-2","position":[0.5,1.25]},
+    {"view":"detail","anchor":"системной границей","cellId":"f1-n4-part-1","position":[0.5,1.25]},
+    {"view":"overview","anchor":"а после этого","cellId":"n-19b86d3cb977fe7ebba186fa","position":[0.85,0.85]},
+    {"view":"annotated","anchor":"сохранить её в граф","cellId":"snippet-random","position":[0.05,1.05]}
+  ]
+}

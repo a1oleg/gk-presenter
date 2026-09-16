@@ -16,7 +16,7 @@ const file=path.join(out,'source.drawio');
 const client=new Client({name:'presenter-scene',version:'1.0.0'});
 try {
  await client.connect(new StdioClientTransport({command:process.execPath,args:[path.join(inspector,'src/mcp.mjs')]}));
- for(const [name,args] of [['inspect_region',{cellId:'228',padding:10000}],['validate_geometry',{}]]) {
+ for(const [name,args] of [['inspect_region',{cellId:process.argv[3]||'228',padding:10000}],['validate_geometry',{}]]) {
   const r=await client.callTool({name,arguments:{file,mode:'rendered',limit:500,...args}},undefined,{timeout:180000});
   if(r.isError)throw Error(JSON.stringify(r.content));
   await fs.writeFile(path.join(out,`${name}.json`),JSON.stringify(r.structuredContent,null,2));
@@ -53,13 +53,14 @@ try{
  const page=await ctx.newPage();
  await page.setContent('<html><body style="margin:0;overflow:hidden;background:white"><div id="graph" style="width:1600px;height:900px"></div></body></html>');
  await page.addScriptTag({path:await resolveViewer()});
- const geometry=await page.evaluate(async xml=>{
+ const geometry=await page.evaluate(async ({xml,focusCellId})=>{
   const graph=new Graph(document.getElementById('graph'));graph.setEnabled(false);
   const doc=mxUtils.parseXml(xml);
   new mxCodec(doc).decode(doc.getElementsByTagName('mxGraphModel')[0],graph.getModel());
   graph.getView().scaleAndTranslate(1,0,0);graph.getView().validate();
   // Fit visible content, not unused editor page margins; preserve all relative positions.
-  const b=graph.getGraphBounds();
+  const b=focusCellId?graph.getView().getState(graph.getModel().getCell(focusCellId)):graph.getGraphBounds();
+  if(!b)throw Error('Focus cell missing: '+focusCellId);
   const scale=Math.min(1440/b.width,700/b.height);
   const tx=(1600/scale-b.width)/2-b.x,ty=(900/scale-b.height)/2-b.y;
   graph.getView().scaleAndTranslate(scale,tx,ty);graph.getView().validate();
@@ -75,7 +76,7 @@ try{
    cells[cell.id]={x:s.x,y:s.y,width:s.width,height:s.height,edge:!!cell.edge,points:s.absolutePoints?.filter(Boolean).map(p=>({x:p.x,y:p.y}))};
   }
   return{width:1600,height:900,scale,translation:{x:tx,y:ty},cells};
- },xml);
+ },{xml,focusCellId:process.argv[4]||null});
  await fs.writeFile(path.join(out,'screen-geometry.json'),JSON.stringify(geometry,null,2));
  await page.screenshot({path:path.join(out,'scene.png')});
  console.log('Scene exported, objects:',Object.keys(geometry.cells).length);
