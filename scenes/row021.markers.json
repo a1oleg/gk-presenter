@@ -1,0 +1,14 @@
+{
+ "transitionSeconds":0.6,
+ "markers":[
+  {"anchor":"Тут две записи","screenPosition":[903,561]},
+  {"anchor":"по индексу полученному в рандоме","screenPosition":[516,478]},
+  {"anchor":"извлекается элемент","screenPosition":[470,449]},
+  {"anchor":"создание виртуальной переменной","screenPosition":[302,520]},
+  {"anchor":"записывается в актуальную позицию","screenPosition":[183,480]},
+  {"anchor":"актуальная буква","screenPosition":[307,704]},
+  {"anchor":"на место полученное из рандома","screenPosition":[306,669]},
+  {"anchor":"операции чтения и записи","screenPosition":[896,590]},
+  {"anchor":"функция меняет местами","screenPosition":[806,534]}
+ ]
+}

@@ -1,0 +1,18 @@
+{
+ "transitionSeconds":0.6,
+ "views":[
+  {"name":"stage1","at":0},
+  {"name":"stage2","anchor":"для swap"},
+  {"name":"stage3","anchor":"результат сохраняется"}
+ ],
+ "markers":[
+  {"view":"stage1","anchor":"Сохраняем аннотацию","cellId":"n-29d9c6caab83f4738fb898b0","position":[0.85,0.85]},
+  {"view":"stage2","anchor":"для swap","cellId":"snippet-swap","position":[0.05,1.05]},
+  {"view":"stage2","anchor":"описать shuffle","cellId":"n-9f82312b8ad3d0e7d3d5e29d","position":[0.85,0.85]},
+  {"view":"stage2","anchor":"контексты обеих веток","cellId":"snippet-random","position":[0.05,1.05]},
+  {"view":"stage3","anchor":"результат сохраняется","cellId":"snippet-shuffle","position":[0.05,1.05]},
+  {"view":"stage3","anchor":"спуск за недостающими смыслами","cellId":"n-19b86d3cb977fe7ebba186fa","position":[0.85,0.85]},
+  {"view":"stage3","anchor":"подъём накопленного контекста","cellId":"snippet-shuffle","position":[0.05,1.05]},
+  {"view":"stage3","anchor":"для всех узлов","cellId":"n-9f82312b8ad3d0e7d3d5e29d","position":[0.85,0.85]}
+ ]
+}

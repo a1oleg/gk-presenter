@@ -10,8 +10,12 @@ async def main():
  expected=snapshot['values'][1]
  checks=json.loads((out/'video-check.json').read_text(encoding='utf8'))
  assert checks['decodedVideoFrames']==checks['expectedFrames'] and checks['audioTrack']
- scene=json.loads((out/'scene-preparation.json').read_text(encoding='utf8'))
- assert hashlib.sha256(Path(scene['source']).read_bytes()).hexdigest()==scene['sha256'],'Original scene changed'
+ if (out/'scene-preparation.json').exists():
+  scene=json.loads((out/'scene-preparation.json').read_text(encoding='utf8'))
+  assert hashlib.sha256(Path(scene['source']).read_bytes()).hexdigest()==scene['sha256'],'Original scene changed'
+ else:
+  markers=json.loads((out/'markers.json').read_text(encoding='utf8'))
+  assert Path(markers['sourceScene']).read_bytes()==(out/'scene.png').read_bytes(),'Screenshot changed'
  video=out/'scene-with-pointer.mp4';assert video.is_file()
  async with stdio_client(StdioServerParameters(command=str(sheets/'.venv/Scripts/python.exe'),args=[str(sheets/'server.py')])) as (r,w):
   async with ClientSession(r,w) as c:
