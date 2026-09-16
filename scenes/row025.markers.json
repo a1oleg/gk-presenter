@@ -1,0 +1,8 @@
+{
+ "transitionSeconds":0.6,
+ "markers":[
+  {"anchor":"Не поручаем агенту", "screenPosition":[73,379]},
+  {"anchor":"с разметки", "screenPosition":[727,379]},
+  {"anchor":"очереди задач", "screenPosition":[878,379]}
+ ]
+}

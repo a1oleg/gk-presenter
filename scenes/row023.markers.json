@@ -1,0 +1,10 @@
+{
+ "transitionSeconds":0.6,
+ "markers":[
+  {"anchor":"Чем это отличается", "screenPosition":[65,170]},
+  {"anchor":"Сохранение проделанной работы", "screenPosition":[92,267]},
+  {"anchor":"Ленивый барьер", "screenPosition":[90,375]},
+  {"anchor":"Функция shuffle", "screenPosition":[180,432]},
+  {"anchor":"Сейчас агенты всецело доверяют", "screenPosition":[90,550]}
+ ]
+}

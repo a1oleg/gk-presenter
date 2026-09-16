@@ -1,0 +1,7 @@
+{
+ "transitionSeconds":0.6,
+ "markers":[
+  {"anchor":"Не слишком ли жадный", "screenPosition":[70,170]},
+  {"anchor":"мы сохраняем все результаты", "screenPosition":[72,270]}
+ ]
+}

@@ -13,6 +13,7 @@ SHEETS=ROOT.parent/'google-sheets-mcp'
 parser=argparse.ArgumentParser()
 parser.add_argument('--row',type=int,default=3)
 parser.add_argument('--audio-only',action='store_true')
+parser.add_argument('--model',choices=['eleven_multilingual_v2','eleven_v3'],default='eleven_multilingual_v2')
 parser.add_argument('--voice-file',type=Path,default=ROOT/'output/elevenlabs-maono-new-clone.local.json')
 parser.add_argument('--text-file',type=Path,help='Explicit spoken-text override; sheet snapshot is still preserved and guarded')
 parser.add_argument('--audio-column',choices=['B','C','D','E','F','G'],default='B')
@@ -46,6 +47,10 @@ async def main():
    key=entries['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")
    voice=json.loads(args.voice_file.read_text(encoding='utf-8'))['voice_id']
    payload={'text':text,'previous_text':previous,'next_text':following,'model_id':'eleven_multilingual_v2','voice_settings':{'stability':0.5,'similarity_boost':1.0,'style':0,'use_speaker_boost':True}}
+   if args.model=='eleven_v3':
+    # v3 uses Natural stability; adjacent-text conditioning and speaker boost
+    # are not supported. Preserve adjacent text in the sheet snapshot only.
+    payload={'text':text,'model_id':args.model,'voice_settings':{'stability':0.5,'similarity_boost':1.0}}
    (out/'request.json').write_text(json.dumps({'voice_id':voice,**payload},ensure_ascii=False,indent=2),encoding='utf-8')
    print('OUTPUT='+str(out),flush=True)
    request=urllib.request.Request(f'https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format=mp3_44100_128',data=json.dumps(payload).encode(),headers={'xi-api-key':key,'Content-Type':'application/json'},method='POST')
