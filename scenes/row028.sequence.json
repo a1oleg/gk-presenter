@@ -1,0 +1,25 @@
+{
+ "transitionSeconds":0.6,
+ "views":[
+  {"name":"frame-01","at":0},
+  {"name":"frame-02","anchor":"Сразу скажу"},
+  {"name":"frame-03","anchor":"Проблема в том"},
+  {"name":"frame-04","anchor":"И когда придёт запрос"},
+  {"name":"frame-05","anchor":"Даже если у нас"},
+  {"name":"frame-06","anchor":"имеют общего родителя"}
+ ],
+ "markers":[
+  {"view":"frame-01","anchor":"Пример как","cellId":"snippet-shuffle","position":[0.08,0.85]},
+  {"view":"frame-02","anchor":"Меняет","cellId":"4","position":[0.18,0.8]},
+  {"view":"frame-02","anchor":"случайный","cellId":"3","position":[0.5,0.8]},
+  {"view":"frame-03","anchor":"Проблема в том","cellId":"14","position":[0.35,0.8]},
+  {"view":"frame-03","anchor":"случайность так","cellId":"8","position":[0.5,0.8]},
+  {"view":"frame-04","anchor":"И когда придёт запрос","cellId":"search-query","position":[0.5,0.8]},
+  {"view":"frame-05","anchor":"Даже если у нас","cellId":"3","position":[0.5,0.8]},
+  {"view":"frame-05","anchor":"очень много вхождений","cellId":"10","position":[0.5,0.8]},
+  {"view":"frame-05","anchor":"размазанных","cellId":"12","position":[0.22,0.8]},
+  {"view":"frame-05","anchor":"getRandom","cellId":"n-19b86d3cb977fe7ebba186fa","position":[0.5,0.85]},
+  {"view":"frame-05","anchor":"swap","cellId":"n-29d9c6caab83f4738fb898b0","position":[0.5,0.85]},
+  {"view":"frame-06","anchor":"имеют общего родителя","cellId":"n-9f82312b8ad3d0e7d3d5e29d","position":[0.5,0.85]}
+ ]
+}
