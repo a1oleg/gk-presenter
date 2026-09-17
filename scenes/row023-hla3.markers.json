@@ -1,0 +1,12 @@
+{
+ "transitionSeconds":0.45,
+ "markers":[
+  {"anchor":"Итак аннотатор", "cellId":"353", "position":[0.5,0.85]},
+  {"anchor":"Запрашивает структуру", "cellId":"228", "position":[0.5,0.7]},
+  {"anchor":"Собирает исходный код", "cellId":"285", "position":[0.5,0.55]},
+  {"anchor":"Потенциально собирает", "cellId":"409", "position":[0.45,0.55]},
+  {"anchor":"Отдаёт агенту", "cellId":"354", "position":[0.5,0.5]},
+  {"anchor":"Сохраняет полученное", "cellId":"228", "position":[0.5,0.7]},
+  {"anchor":"на диаграмму", "cellId":"367", "position":[0.5,0.6]}
+ ]
+}

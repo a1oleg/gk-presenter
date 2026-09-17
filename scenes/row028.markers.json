@@ -1,0 +1,8 @@
+{
+ "transitionSeconds":0.6,
+ "markers":[
+  {"anchor":"Можно построить", "screenPosition":[73,270]},
+  {"anchor":"Сформировать эмбеддинги", "screenPosition":[73,380]},
+  {"anchor":"Улучшить ранжирование", "screenPosition":[73,493]}
+ ]
+}
