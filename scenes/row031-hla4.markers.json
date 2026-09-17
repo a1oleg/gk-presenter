@@ -1,0 +1,20 @@
+{
+  "transitionSeconds": 0.65,
+  "markers": [
+    {"anchor":"Перейдём к Claude Code", "cellId":"307", "position":[0.7,0.8]},
+    {"anchor":"Это React-подобное приложение", "cellId":"source", "position":[0.7,0.85]},
+    {"anchor":"Чтобы получить из него граф", "cellId":"228", "position":[0.75,0.85]},
+    {"anchor":"Применяется подход", "cellId":"extractor", "position":[0.7,0.85]},
+    {"anchor":"Я частично опираюсь на CodeQL", "cellId":"codeql", "position":[0.7,0.85]},
+    {"anchor":"Парсер разбирает исходный текст", "cellId":"parser", "position":[0.7,0.85]},
+    {"anchor":"абстрактное синтаксическое дерево", "cellId":"ast", "position":[0.7,0.85]},
+    {"anchor":"Экстрактор получает дерево через API", "cellId":"compiler-api", "position":[0.7,0.85]},
+    {"anchor":"Далее преобразует найденные факты", "cellId":"extractor", "position":[0.7,0.85]},
+    {"anchor":"Промежуточные данные попадают в DuckDB", "cellId":"duckdb", "position":[0.7,0.85]},
+    {"anchor":"Подготовленные узлы и связи выгружаются в Parquet", "cellId":"parquet", "position":[0.7,0.85]},
+    {"anchor":"Дальше импортёр проверяет", "cellId":"importer", "position":[0.7,0.85]},
+    {"anchor":"загружает сущности и связи в Neo4j", "cellId":"228", "position":[0.75,0.85]}
+  ],
+  "hideAt":"При точечном обновлении",
+  "hideReason":"Завершающее замечание относится к конвейеру в целом."
+}
