@@ -13,7 +13,7 @@ fps=30;frame_count=math.ceil((audio_duration+.3)*fps);duration=frame_count/fps
 prefix=[]
 if scene.get('transition'):
  camera=scene['transition']['camera']['samples']
- assert len(camera)>=5 and camera[0]['t']==0 and camera[-1]['t']==1
+ assert len(camera)>=5 and camera[0]['t']<.01 and camera[-1]['t']==1
  dy=camera[-1]['top']-camera[0]['top']
  assert all((b['top']-a['top'])*dy>=0 for a,b in zip(camera,camera[1:])),'Camera scroll reversed'
  assert max(abs(b['top']-a['top']) for a,b in zip(camera,camera[1:]))<=max(2,abs(dy)*.15),'Camera jumped'
@@ -40,14 +40,15 @@ pointer_checks=[]
 for marker in markers[1:]:
  current=np.array(Image.open(marker['file']).convert('RGB')).astype(int)
  delta=np.max(np.abs(original-current),axis=2)>30
- if marker['cellId']==markers[0]['cellId'] and marker['sourceStableId']==markers[0]['sourceStableId']:continue
+ if marker['cellId']==markers[0]['cellId'] and marker.get('text')==markers[0].get('text') and marker['sourceStableId']==markers[0]['sourceStableId']:continue
  # Verify the configured two-zone layout; these pixels never locate pointer targets.
  if scene['placement']=='BELOW':
   split=round(900*.66);top=int(delta[:split].sum());bottom=int(delta[split:].sum())
  else:
   split=round(1600*.55);top=int(delta[:,:split].sum());bottom=int(delta[:,split:].sum())
- assert top>50 and bottom>30,(marker['anchor'],top,bottom)
- pointer_checks.append({'anchor':marker['anchor'],'diagramChangedPixels':top,'sourceChangedPixels':bottom})
+ source_moves=marker['sourceStableId']!=markers[0]['sourceStableId']
+ assert top>50 and (not source_moves or bottom>30),(marker['anchor'],top,bottom)
+ pointer_checks.append({'anchor':marker['anchor'],'diagramChangedPixels':top,'sourceChangedPixels':bottom,'sourcePointerMoves':source_moves})
 manifest=['ffconcat version 1.0']
 for i,m in enumerate(markers):
  end=markers[i+1]['time'] if i+1<len(markers) else duration

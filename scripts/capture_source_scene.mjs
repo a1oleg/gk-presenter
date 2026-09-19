@@ -4,7 +4,8 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
 import {connectObs} from './obs_control.mjs';
-const [directory,planFile]=process.argv.slice(2);
+const [directory,planFile,...flags]=process.argv.slice(2);
+if(flags.some(f=>f!=='--standalone'))throw Error('Unknown capture option');
 if(!directory||!planFile)throw Error('Usage: capture_source_scene.mjs AUDIO_DIRECTORY PLAN');
 const out=path.resolve(directory),plan=JSON.parse(await fs.readFile(planFile,'utf8'));
 const snapshot=JSON.parse(await fs.readFile(path.join(out,'sheet-source.json'),'utf8'));
@@ -17,10 +18,10 @@ const matches=index.cells.filter(c=>c.stableId===plan.stableId);
 const heads=matches.filter(c=>!matches.some(p=>p.cellId===c.parent));
 if(heads.length!==1)throw Error('Ambiguous semantic step head');
 const base={functionStableId:plan.functionStableId},head=heads[0];
-const previous=plan.previousFragment?JSON.parse(await fs.readFile(path.resolve(plan.previousFragment),'utf8')):null;
+const previous=plan.previousFragment&&!flags.includes('--standalone')?JSON.parse(await fs.readFile(path.resolve(plan.previousFragment),'utf8')):null;
 if(previous&&(previous.sha256!==index.digest||previous.placement!==plan.placement))throw Error('Previous fragment uses a different diagram or layout');
 let opened=await bridge({...base,surface:'editor',action:'openSource',filePath:plan.diagram,stableId:previous?.stableId||plan.stableId,placement:plan.placement});
-let focused=await bridge({...base,surface:'diagram',action:'presentFocus',stableId:previous?.stableId||plan.stableId,cellId:previous?.headCellId||head.cellId,includeAnnotations:true});
+let focused=await bridge({...base,surface:'diagram',action:'presentFocus',stableId:previous?.stableId||plan.stableId,cellId:previous?.headCellId||head.cellId,includeAnnotations:true,includeStep:!previous&&plan.includeStep});
 if(focused.formatPanelVisible!==false)throw Error('Format panel must be hidden before capture');
 if(focused.viewport.height<250||focused.scale<.8)throw Error('Insufficient presentation space');
 const hash=async f=>createHash('sha256').update(await fs.readFile(f)).digest('hex');
@@ -54,7 +55,7 @@ try {
   try {
    await new Promise(r=>setTimeout(r,200));
    opened=await bridge({...base,surface:'editor',action:'openSource',filePath:plan.diagram,stableId:plan.stableId,placement:plan.placement,previousStableId:previous.stableId});
-   focused=await bridge({...base,surface:'diagram',action:'presentFocus',stableId:plan.stableId,cellId:head.cellId,includeAnnotations:true,previousStableId:previous.stableId,durationMs:plan.transitionMs??1200});
+   focused=await bridge({...base,surface:'diagram',action:'presentFocus',stableId:plan.stableId,cellId:head.cellId,includeAnnotations:true,includeStep:plan.includeStep,previousStableId:previous.stableId,durationMs:plan.transitionMs??1200});
    await new Promise(r=>setTimeout(r,200));
   }finally{transition=await obs.request('StopRecord');}
   // OBS acknowledges StopRecord before its muxer has necessarily flushed the file.
@@ -67,7 +68,7 @@ try {
  }
  const frames=[];
  for(const [i,cue] of plan.markers.entries()){
-  const diagram=await bridge({...base,surface:'diagram',action:'presentPointer',stableId:plan.stableId,cellId:cue.cellId,pointerId:'narrator',durationMs:0});
+  const diagram=await bridge({...base,surface:'diagram',action:'presentPointer',stableId:cue.diagramStableId||plan.stableId,cellId:cue.cellId,text:cue.text,pointerId:'narrator',durationMs:0});
   const code=await bridge({...base,surface:'editor',action:'sourcePointer',stableId:cue.sourceStableId});
   await new Promise(r=>setTimeout(r,600));
   const file=path.join(out,`dual-${String(i).padStart(2,'0')}.png`);
@@ -75,6 +76,6 @@ try {
   frames.push({...cue,file,sha256:await hash(file),diagram,code});
  }
  if(sourceHash!==await hash(opened.file)||index.digest!==(await diagramIndex({file:plan.diagram})).digest)throw Error('Source/diagram changed during capture');
- await fs.writeFile(path.join(out,'scene-preparation.json'),JSON.stringify({source:index.file,sha256:index.digest,sourceFile:opened.file,sourceSha256:sourceHash,stableId:plan.stableId,headCellId:head.cellId,placement:plan.placement,previousFragment:plan.previousFragment?path.resolve(plan.previousFragment):null,transition,opened,focused,frames,coordinateSource:'draw.io live view and VS Code semantic source ranges',obsWindow:settings.inputSettings.window},null,2));
+ await fs.writeFile(path.join(out,'scene-preparation.json'),JSON.stringify({source:index.file,sha256:index.digest,sourceFile:opened.file,sourceSha256:sourceHash,stableId:plan.stableId,headCellId:head.cellId,placement:plan.placement,previousFragment:previous?path.resolve(plan.previousFragment):null,transition,opened,focused,frames,coordinateSource:'draw.io live view and VS Code semantic source ranges',obsWindow:settings.inputSettings.window},null,2));
  console.log(JSON.stringify({directory:out,frames:frames.length,headCellId:head.cellId,focused,code:frames.map(x=>x.code.text)}));
 }finally{obs.close();}

@@ -1,0 +1,18 @@
+{
+  "diagram": "graph/draw/generated/onSubmit-REPL.tsx-3142.drawio",
+  "functionStableId": "screens/REPL.tsx:3142:31:3533:3",
+  "stableId": "screens/REPL.tsx:3142:82:3146:3",
+  "placement": "BELOW",
+  "includeStep": true,
+  "previousFragment": "output/scene-row035-retake-1789812067477879100/scene-preparation.json",
+  "transitionMs": 1200,
+  "markers": [
+    {"anchor":"Следующим параметром", "cellId":"n4-part-1", "sourceStableId":"screens/REPL.tsx:3142:82:3142:99"},
+    {"anchor":"фигурным скобкам", "cellId":"n6", "diagramStableId":"screens/REPL.tsx:3142:82:3146:3:type:object-family:left:0", "sourceStableId":"screens/REPL.tsx:3142:102:3142:103"},
+    {"anchor":"системным number", "cellId":"n9-part-2", "diagramStableId":"screens/REPL.tsx:3142:82:3146:3:type:object-family:field:1:speculationSessionTimeSavedMs", "sourceStableId":"screens/REPL.tsx:3144:35:3144:41"},
+    {"anchor":"двумя разработческими", "cellId":"n8-part-2", "diagramStableId":"screens/REPL.tsx:3142:82:3146:3:type:object-family:field:0:state", "sourceStableId":"screens/REPL.tsx:3143:11:3143:33"},
+    {"anchor":"типами.", "cellId":"n10-part-2", "diagramStableId":"screens/REPL.tsx:3142:82:3146:3:type:object-family:field:2:setAppState", "sourceStableId":"screens/REPL.tsx:3145:17:3145:28"},
+    {"anchor":"Аннотация к параметру", "cellId":"annotation-mth6mghf", "text":"необязательный контекст", "sourceStableId":"screens/REPL.tsx:3142:82:3142:99"},
+    {"anchor":"упреждающее выполнение", "cellId":"annotation-mth6mghf", "text":"упреждающего выполнения", "sourceStableId":"screens/REPL.tsx:3142:82:3142:99"}
+  ]
+}
