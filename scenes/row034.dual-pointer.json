@@ -1,0 +1,13 @@
+{
+  "diagram": "graph/draw/generated/onSubmit-REPL.tsx-3142.drawio",
+  "functionStableId": "screens/REPL.tsx:3142:31:3533:3",
+  "stableId": "screens/REPL.tsx:3142:38:3142:51",
+  "placement": "BELOW",
+  "markers": [
+    {"anchor":"Начинается функция", "cellId":"n2-part-1", "sourceStableId":"screens/REPL.tsx:3142:38:3142:43"},
+    {"anchor":"Это штрихованный метод", "cellId":"n2-part-2", "sourceStableId":"screens/REPL.tsx:3142:43:3142:44"},
+    {"anchor":"И фиолетовый системный тип", "cellId":"n2-part-3", "sourceStableId":"screens/REPL.tsx:3142:45:3142:51"},
+    {"anchor":"Со смыслом параметра", "cellId":"n2-part-1", "sourceStableId":"screens/REPL.tsx:3142:38:3142:43"},
+    {"anchor":"Но благодаря аннотации", "cellId":"annotation-mu3lwsm7", "sourceStableId":"screens/REPL.tsx:3142:38:3142:51"}
+  ]
+}
