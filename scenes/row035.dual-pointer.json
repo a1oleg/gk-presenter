@@ -1,0 +1,13 @@
+{
+  "diagram": "graph/draw/generated/onSubmit-REPL.tsx-3142.drawio",
+  "functionStableId": "screens/REPL.tsx:3142:31:3533:3",
+  "stableId": "screens/REPL.tsx:3142:53:3142:80",
+  "placement": "BELOW",
+  "previousFragment": "output/scene-row034-1789809587135138600/scene-preparation.json",
+  "transitionMs": 1200,
+  "markers": [
+    {"anchor":"Следующий параметр", "cellId":"n3-part-1", "sourceStableId":"screens/REPL.tsx:3142:53:3142:60"},
+    {"anchor":"Он типизирован", "cellId":"n3-part-3", "sourceStableId":"screens/REPL.tsx:3142:62:3142:80"},
+    {"anchor":"Занимаются эти хелперы", "cellId":"n3-part-1", "sourceStableId":"screens/REPL.tsx:3142:53:3142:60"}
+  ]
+}
