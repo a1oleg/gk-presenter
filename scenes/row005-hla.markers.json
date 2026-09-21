@@ -1,0 +1,14 @@
+{
+  "transitionSeconds": 0.55,
+  "hideAt": "Все материалы",
+  "hideReason": "Дальше речь об описании ролика, а не о блоках схемы.",
+  "markers": [
+    {"anchor": "со скриптов", "cellId": "332", "position": [0.5, 0.7]},
+    {"anchor": "из исходного кода", "cellId": "source", "position": [0.65, 0.7]},
+    {"anchor": "сущности и связи", "cellId": "332", "position": [0.65, 0.7]},
+    {"anchor": "преобразуют их", "cellId": "333", "position": [0.65, 0.7]},
+    {"anchor": "в граф", "cellId": "228", "position": [0.75, 0.55]},
+    {"anchor": "диаграмму", "cellId": "ui", "position": [0.65, 0.65]},
+    {"anchor": "Neo four J", "cellId": "199", "position": [0.65, 0.65]}
+  ]
+}

@@ -11,8 +11,12 @@ if(cells.some(c=>!c))throw Error('Missing semantic cells');
 const anchors=['Сначала вычисляется','Потом проверяется','В таком случае','И если да','а для пользователя'];
 const cues=anchors.map((anchor,i)=>{const at=text.indexOf(anchor);if(at<0)throw Error(anchor);return {anchor,time:a.character_start_times_seconds[at],...cells[i]};});
 const send=(action,c,extra={})=>bridge({surface:'diagram',action,functionStableId:fn,stableId:c.stableId,cellId:c.cellId,...extra});
-const focus=await send('presentFocus',cells[0],{includeAnnotations:true,scale:.75});
-if(focus.scale!==.75||focus.formatPanelVisible!==false)throw Error('Camera/format panel check failed');
+const snapshot=JSON.parse(await fs.readFile(path.join(out,'sheet-source.json'),'utf8'));
+const row=snapshot.values[2],headers=snapshot.values[0];
+if(row[headers.indexOf('код')]!=='нет')throw Error('This capture requires diagram-only mode');
+await bridge({surface:'editor',action:'openDiagram',functionStableId:fn,filePath:'graph/draw/generated/queryModel.drawio'});
+const outputScale=Number(row[headers.indexOf('масштаб VS code')])/100;
+let focus,diagramScale;
 const obs=await connectObs(),events=[];let started=false;
 try{
  if((await obs.request('GetRecordStatus')).outputActive)throw Error('Recording already active');
@@ -24,6 +28,9 @@ try{
  await fs.writeFile(path.join(out,'obs-before.json'),JSON.stringify({sceneName,...before,settings},null,2));
  for(const s of before.sceneItems)await obs.request('SetSceneItemEnabled',{sceneName,sceneItemId:s.sceneItemId,sceneItemEnabled:s.sceneItemId===item.sceneItemId});
  const {sourceWidth:w,sourceHeight:h}=item.sceneItemTransform,s=Math.min(1600/w,900/h);
+ diagramScale=outputScale/s;
+ focus=await send('presentFocus',cells[0],{includeAnnotations:true,scale:diagramScale});
+ if(Math.abs(focus.scale*s-outputScale)>.001||focus.formatPanelVisible!==false)throw Error('Effective scale/format panel check failed');
  await obs.request('SetInputSettings',{inputName:'VS Code OBS',inputSettings:{cursor:false},overlay:true});
  await obs.request('SetSceneItemTransform',{sceneName,sceneItemId:item.sceneItemId,sceneItemTransform:{cropLeft:0,cropRight:0,cropTop:0,cropBottom:0,boundsType:'OBS_BOUNDS_NONE',alignment:5,rotation:0,scaleX:s,scaleY:s,positionX:(1600-w*s)/2,positionY:(900-h*s)/2}});
  await send('presentPointer',cells[0],{durationMs:0});
@@ -31,7 +38,7 @@ try{
  for(const cue of cues){
   await new Promise(r=>setTimeout(r,Math.max(0,cue.time*1000-(performance.now()-start))));
   let camera=null;
-  if(cue.cellId==='f0-n23'||cue.cellId==='f0-n30')camera=await send('presentFocus',cue,{includeAnnotations:true,scale:.75,previousStableId:cells[0].stableId,durationMs:1100});
+  if(cue.cellId==='f0-n23'||cue.cellId==='f0-n30')camera=await send('presentFocus',cue,{includeAnnotations:true,scale:diagramScale,previousStableId:cells[0].stableId,durationMs:1100});
   const pointer=await send('presentPointer',cue,{durationMs:550});
   events.push({...cue,actualTime:(performance.now()-start)/1000,camera,pointer});
  }
