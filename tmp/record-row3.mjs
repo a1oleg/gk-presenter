@@ -1,0 +1,44 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {connectObs} from '../scripts/obs_control.mjs';
+const out=process.argv[2],fn='services/api/claude.ts:1022:0:2911:1';
+const a=JSON.parse(await fs.readFile(path.join(out,'alignment.json'),'utf8')).alignment;
+const text=a.characters.join(''),end=a.character_end_times_seconds.at(-1)+.8;
+const index=await diagramIndex({file:'graph/draw/generated/queryModel.drawio'});
+const cells=['f0-n9','f0-n12','f0-n22','f0-n23','f0-n30'].map(id=>index.cells.find(c=>c.cellId===id));
+if(cells.some(c=>!c))throw Error('Missing semantic cells');
+const anchors=['Сначала вычисляется','Потом проверяется','В таком случае','И если да','а для пользователя'];
+const cues=anchors.map((anchor,i)=>{const at=text.indexOf(anchor);if(at<0)throw Error(anchor);return {anchor,time:a.character_start_times_seconds[at],...cells[i]};});
+const send=(action,c,extra={})=>bridge({surface:'diagram',action,functionStableId:fn,stableId:c.stableId,cellId:c.cellId,...extra});
+const focus=await send('presentFocus',cells[0],{includeAnnotations:true,scale:.75});
+if(focus.scale!==.75||focus.formatPanelVisible!==false)throw Error('Camera/format panel check failed');
+const obs=await connectObs(),events=[];let started=false;
+try{
+ if((await obs.request('GetRecordStatus')).outputActive)throw Error('Recording already active');
+ const {currentProgramSceneName:sceneName}=await obs.request('GetCurrentProgramScene');
+ const before=await obs.request('GetSceneItemList',{sceneName});
+ const item=before.sceneItems.find(x=>x.sourceName==='VS Code OBS');if(!item)throw Error('Missing OBS input');
+ const settings=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});
+ if(!settings.inputSettings.window.includes('coldKode PRESENTATION')||settings.inputSettings.priority!==0)throw Error('Unsafe OBS target');
+ await fs.writeFile(path.join(out,'obs-before.json'),JSON.stringify({sceneName,...before,settings},null,2));
+ for(const s of before.sceneItems)await obs.request('SetSceneItemEnabled',{sceneName,sceneItemId:s.sceneItemId,sceneItemEnabled:s.sceneItemId===item.sceneItemId});
+ const {sourceWidth:w,sourceHeight:h}=item.sceneItemTransform,s=Math.min(1600/w,900/h);
+ await obs.request('SetInputSettings',{inputName:'VS Code OBS',inputSettings:{cursor:false},overlay:true});
+ await obs.request('SetSceneItemTransform',{sceneName,sceneItemId:item.sceneItemId,sceneItemTransform:{cropLeft:0,cropRight:0,cropTop:0,cropBottom:0,boundsType:'OBS_BOUNDS_NONE',alignment:5,rotation:0,scaleX:s,scaleY:s,positionX:(1600-w*s)/2,positionY:(900-h*s)/2}});
+ await send('presentPointer',cells[0],{durationMs:0});
+ await obs.request('StartRecord');started=true;const start=performance.now();
+ for(const cue of cues){
+  await new Promise(r=>setTimeout(r,Math.max(0,cue.time*1000-(performance.now()-start))));
+  let camera=null;
+  if(cue.cellId==='f0-n23'||cue.cellId==='f0-n30')camera=await send('presentFocus',cue,{includeAnnotations:true,scale:.75,previousStableId:cells[0].stableId,durationMs:1100});
+  const pointer=await send('presentPointer',cue,{durationMs:550});
+  events.push({...cue,actualTime:(performance.now()-start)/1000,camera,pointer});
+ }
+ await new Promise(r=>setTimeout(r,Math.max(0,end*1000-(performance.now()-start))));
+ const stopped=await obs.request('StopRecord');started=false;
+ await new Promise(r=>setTimeout(r,1500));
+ const recording=path.join(out,'recording'+path.extname(stopped.outputPath));await fs.copyFile(stopped.outputPath,recording);
+ await fs.writeFile(path.join(out,'scene-preparation.json'),JSON.stringify({recording,source:index.file,sha256:index.digest,focus,events,duration:end,voice:'3.3',microphoneAudioUsed:false},null,2));
+ console.log(JSON.stringify({recording,duration:end,events:events.length}));
+}finally{if(started)await obs.request('StopRecord');obs.close();}

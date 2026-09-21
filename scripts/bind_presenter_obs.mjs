@@ -4,11 +4,13 @@ import path from 'node:path';
 import {connectObs} from './obs_control.mjs';
 const obs=await connectObs();
 try {
+ if((await obs.request('GetRecordStatus')).outputActive)throw Error('Cannot rebind during recording');
  const health=await fetch('http://127.0.0.1:17844/health').then(r=>r.json());
  if(health.presentationWindow!==true)throw Error('Presentation bridge is not ready');
  const {currentProgramSceneName:sceneName}=await obs.request('GetCurrentProgramScene');
  const {sceneItems}=await obs.request('GetSceneItemList',{sceneName});
- const enabled=sceneItems.filter(i=>i.sceneItemEnabled&&i.inputKind==='window_capture');
+ const requestedName=process.argv[2];
+ const enabled=sceneItems.filter(i=>i.inputKind==='window_capture'&&(requestedName?i.sourceName===requestedName:i.sceneItemEnabled));
  if(enabled.length!==1)throw Error('Expected exactly one enabled window capture; select it in OBS first');
  const inputName=enabled[0].sourceName;
  const {propertyItems}=await obs.request('GetInputPropertiesListPropertyItems',{inputName,propertyName:'window'});
