@@ -84,7 +84,7 @@ finally:
 if process.wait()!=0: raise SystemExit('Video encoder failed')
 with av.open(str(out/'scene-with-pointer.mp4')) as video:
     assert len(video.streams.video)==1 and len(video.streams.audio)==1
-    assert video.streams.video[0].width==1600 and video.streams.video[0].height==900
+    assert (video.streams.video[0].width,video.streams.video[0].height)==(geo['width'],geo['height'])
     count=sum(1 for _ in video.decode(video=0))
     assert count==frames,(count,frames)
 checks={'decodedVideoFrames':count,'expectedFrames':frames,'allTargetsInsideFrame':True,'monotonicAnchors':True,'audioTrack':True,'sourceSceneUnchanged':(out/('scene.png' if args.background else 'source.drawio')).read_bytes()==Path(resolved['sourceScene']).read_bytes()}
