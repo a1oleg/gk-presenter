@@ -1,0 +1,36 @@
+{
+  "sceneName": "Сцена",
+  "item": {
+    "inputKind": "window_capture",
+    "isGroup": null,
+    "sceneItemBlendMode": "OBS_BLEND_NORMAL",
+    "sceneItemEnabled": true,
+    "sceneItemId": 13,
+    "sceneItemIndex": 2,
+    "sceneItemLocked": false,
+    "sceneItemTransform": {
+      "alignment": 5,
+      "boundsAlignment": 0,
+      "boundsHeight": 0,
+      "boundsType": "OBS_BOUNDS_NONE",
+      "boundsWidth": 0,
+      "cropBottom": 0,
+      "cropLeft": 77,
+      "cropRight": 321,
+      "cropToBounds": false,
+      "cropTop": 194,
+      "height": 1032,
+      "positionX": 50,
+      "positionY": 130,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "sourceHeight": 1032,
+      "sourceWidth": 1920,
+      "width": 1920
+    },
+    "sourceName": "VS Code OBS",
+    "sourceType": "OBS_SOURCE_TYPE_INPUT",
+    "sourceUuid": "41dc4bf1-9ec8-4645-b6cf-06dbf1a4f74f"
+  }
+}
