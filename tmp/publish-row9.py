@@ -9,8 +9,12 @@ async def main():
   async with ClientSession(r,w) as c:
    await c.initialize();p={'spreadsheet_id':snap['spreadsheetId'],'notation':'!A9:J9'}
    async def read():return json.loads((await c.call_tool('get_sheet_data_by_notation',p)).content[0].text)['values'][0]
-   assert await read()==old
-   updated=[text,*old[1:9],str(out/'scene.mp4')]
-   result=await c.call_tool('update_cells',{'spreadsheet_id':p['spreadsheet_id'],'range_a1':"'Видео'!A9:J9",'values_json':json.dumps([updated]),'value_input_option':'RAW'});assert not result.isError
+   expected=[text,*old[1:9],sys.argv[2]] if len(sys.argv)>2 else old
+   actual=await read()
+   if len(sys.argv)>2:
+    assert actual in [expected,[old[0],*old[1:9],sys.argv[2]]]
+   else:assert actual==expected
+   updated=[*actual[:9],str(out/'scene.mp4')]
+   result=await c.call_tool('update_cells',{'spreadsheet_id':p['spreadsheet_id'],'range_a1':"'Видео'!J9",'values_json':json.dumps([[updated[9]]]),'value_input_option':'RAW'});assert not result.isError
    assert await read()==updated;print('J9 verified')
 asyncio.run(main())
