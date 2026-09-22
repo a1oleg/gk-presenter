@@ -10,6 +10,8 @@ try{
  await page.goto('http://127.0.0.1:9031/render.html');
  await page.waitForFunction(()=>typeof window.renderCaptions==='function',{timeout:30000});
  const result=await page.evaluate(s=>window.renderCaptions(s),scene);
+ const codeLayout=await page.evaluate(()=>window.codeLayoutReport||null);
+ if(codeLayout)await fs.writeFile(path.join(out,'code-layout-check.json'),JSON.stringify(codeLayout,null,2));
  if(errors.length||frames<Math.floor(scene.duration*30))throw Error(JSON.stringify({errors,frames}));
  await fs.writeFile(path.join(out,'motion-render.json'),JSON.stringify({...result,frames},null,2));console.log({...result,frames});
 }finally{await browser.close();}

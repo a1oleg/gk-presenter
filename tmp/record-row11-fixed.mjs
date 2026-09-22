@@ -13,8 +13,9 @@ const cues=entries.map(([anchor,id,line,token])=>{const i=text.indexOf(anchor),c
 const send=(action,c,extra={})=>bridge({surface:'diagram',action,functionStableId:fn,stableId:c.stableId,cellId:c.cellId,...extra});
 const pointCode=c=>bridge({surface:'editor',action:'sourcePointer',functionStableId:fn,stableId:c.sourceStableId});
 const before=await send('presentRead',cues[0]);
-const codeBefore=await pointCode(cues[0]);
-if(scenario&&(!scenario.code.layout.safe||scenario.code.layout.calibration.visibleStartLine!==codeBefore.visibleStartLine))throw Error('Code viewport no longer matches validated caption layout');
+const motionCode=scenario?.kind==='dual-scene';
+const codeBefore=motionCode?{renderer:'Motion Canvas'}:await pointCode(cues[0]);
+if(scenario&&!motionCode&&(!scenario.code.layout.safe||scenario.code.layout.calibration.visibleStartLine!==codeBefore.visibleStartLine))throw Error('Code viewport no longer matches validated caption layout');
 await send('presentPointer',cues[0],{durationMs:0});
 const obs=await connectObs();let active=false;
 try{
@@ -26,7 +27,7 @@ try{
  if(scene.sceneItems.some(x=>x.sceneItemEnabled&&x!==item))throw Error('Unexpected source visible');
  await fs.writeFile(path.join(out,'obs-before.json'),JSON.stringify(scene,null,2));
  await obs.request('StartRecord');active=true;const start=performance.now(),events=[];
- for(const cue of cues){await new Promise(r=>setTimeout(r,Math.max(0,cue.time*1000-(performance.now()-start))));events.push({...cue,diagram:await send('presentPointer',cue,{durationMs:500}),code:await pointCode(cue)});}
+ for(const cue of cues){await new Promise(r=>setTimeout(r,Math.max(0,cue.time*1000-(performance.now()-start))));events.push({...cue,diagram:await send('presentPointer',cue,{durationMs:500}),code:motionCode?{renderer:'Motion Canvas',time:cue.time}:await pointCode(cue)});}
  await new Promise(r=>setTimeout(r,Math.max(0,(a.character_end_times_seconds.at(-1)+1)*1000-(performance.now()-start))));
  const result=await obs.request('StopRecord');active=false;await new Promise(r=>setTimeout(r,1200));
  const recording=path.join(out,'recording'+path.extname(result.outputPath));await fs.copyFile(result.outputPath,recording);

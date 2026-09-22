@@ -22,8 +22,9 @@ async def publish():
   async with ClientSession(r,w) as c:
    await c.initialize();snap=json.loads((out/'sheet-source.json').read_text(encoding='utf8'));sid=snap['spreadsheetId']
    async def read(n):return json.loads((await c.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':sid,'notation':n})).content[0].text)
-   assert (await read('!A11:K11'))['values']==snap['values'],'Sheet changed; video not published'
+   assert (await read(scene.get('sheetRange','!A11:K11')))['values']==snap['values'],'Sheet changed; video not published'
    assert (await read("'ФЙ-сценарий'!A1:N4"))['values']==json.loads((out/'scenario-source.json').read_text(encoding='utf8'))['values']
-   result=await c.call_tool('update_cells',{'spreadsheet_id':sid,'range_a1':"'Видео'!K11",'values_json':json.dumps([[str(video)]]),'value_input_option':'RAW'});assert not result.isError
-   assert (await read('!K11'))['values']==[[str(video)]];print(json.dumps(report,ensure_ascii=False))
+   destination=scene.get('publishRange',"'Видео'!K11")
+   result=await c.call_tool('update_cells',{'spreadsheet_id':sid,'range_a1':destination,'values_json':json.dumps([[str(video)]]),'value_input_option':'RAW'});assert not result.isError
+   assert (await read(destination))['values']==[[str(video)]];print(json.dumps(report,ensure_ascii=False))
 asyncio.run(publish())
