@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "scene:prepare": "node scripts/stage-scene.mjs --action prepare",
+    "scene:apply": "node scripts/stage-scene.mjs --action apply",
+    "scene:check": "node scripts/stage-scene.mjs --action check",
     "test": "node --test",
     "render:serve": "node scripts/serve-render.mjs",
     "check": "node src/check-lesson.mjs examples/lesson.json"

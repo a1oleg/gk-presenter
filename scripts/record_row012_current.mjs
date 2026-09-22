@@ -2,9 +2,15 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {bridge} from '../../coldKode/graph/presentation/presentation.mjs';
+import {applyPreparedScene,checkPreparedScene,loadPreparedScene} from '../src/scene-staging.mjs';
 import {connectObs} from './obs_control.mjs';
 
 const out=path.resolve(process.argv[2]);
+const {plan}=await loadPreparedScene(out);
+if(plan.sheet.row!==12)throw Error('This interactive timeline is for row 12 only');
+const sheet=JSON.parse(await fs.readFile(path.join(out,'scene-sheet-source.json'),'utf8'));
+const narration=JSON.parse(await fs.readFile(path.join(out,'request.json'),'utf8'));
+if(narration.text.trim()!==sheet.values[0][0].trim())throw Error('Narration differs from the prepared sheet text');
 const run=JSON.parse(await fs.readFile(path.join(out,'runtime-session.json'),'utf8'));
 const alignment=JSON.parse(await fs.readFile(path.join(out,'alignment.json'),'utf8')).alignment;
 const text=alignment.characters.join('');
@@ -18,9 +24,8 @@ const obs=await connectObs();let owned=false;
 try {
   if((await obs.request('GetRecordStatus')).outputActive)throw Error('OBS already recording');
   await step({surface:'runtime',action:'selectAll',sessionId:run.sessionId});
-  await step({surface:'editor',action:'openDiagram',filePath:'graph/draw/generated/Fisher-Yates.drawio'});
+  await applyPreparedScene(out);
   await step({surface:'diagram',action:'dismissMenu'});
-  await step({surface:'diagram',action:'presentFocus',stableId:run.loop,cellId:'f0-n4',scale:0.6});
   const readFrame=async()=>bridge({...base,surface:'diagram',action:'presentRead',stableId:run.loop,cellId:'f0-n4'});
   const initialFrame=await readFrame();
   assert(initialFrame.visible,'Loop is outside the initial viewport');
@@ -28,7 +33,9 @@ try {
   const {sceneItems}=await obs.request('GetSceneItemList',{sceneName:'coldKode A12'});
   const capture=sceneItems.find(i=>i.sourceName==='coldKode presentation capture');
   if(!capture||capture.sceneItemTransform.sourceWidth<=0)throw Error('Empty capture');
-  await obs.request('SetSceneItemTransform',{sceneName:'coldKode A12',sceneItemId:capture.sceneItemId,sceneItemTransform:{boundsType:'OBS_BOUNDS_SCALE_INNER',boundsWidth:1920,boundsHeight:1080,boundsAlignment:0,alignment:5,positionX:0,positionY:0}});
+  const video=await obs.request('GetVideoSettings');
+  if(video.outputWidth!==plan.canvas.width||video.outputHeight!==plan.canvas.height||video.fpsNumerator/video.fpsDenominator!==plan.canvas.fps)throw Error('OBS format differs from prepared scene');
+  await obs.request('SetSceneItemTransform',{sceneName:'coldKode A12',sceneItemId:capture.sceneItemId,sceneItemTransform:{boundsType:'OBS_BOUNDS_SCALE_INNER',boundsWidth:plan.canvas.width,boundsHeight:plan.canvas.height,boundsAlignment:0,alignment:5,positionX:0,positionY:0}});
   await obs.request('SetRecordDirectory',{recordDirectory:out});
   const schedule=[
     [anchor('откроем'),{surface:'diagram',action:'contextMenu',cellId:'f0-n4'}],
@@ -41,6 +48,7 @@ try {
   ];
   await fs.writeFile(path.join(out,'capture-plan.json'),JSON.stringify({sessionId:run.sessionId,schedule},null,2));
   events.length=0;
+  await checkPreparedScene(out);
   await obs.request('StartRecord');owned=true;started=performance.now();
   const cameras=[];
   const readCamera=async()=> {
