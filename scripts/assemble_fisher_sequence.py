@@ -52,6 +52,9 @@ for number in range(5,10):
   v['current']['index']-=1
   s['captionEvents'].append({'time':moment(9,'уменьшим'),'row':9,'values':copy.deepcopy(v),'source':'narrated decrement by one; shuffle.ts:25 current.index--'})
 s['duration']=clock;s['id']='fisher-scenario-A1-N9';s['scenarioRange']="'ФЙ-сценарий'!A1:N9";s['audioSource']=str(out/'speech.wav');s['voiceNote']='3.3; first paragraph reused, remaining generated'
+if (out/'sheet-headers.json').exists():
+ video_index=load(out/'sheet-headers.json')['values'][0].index('ссылка на видео')
+ s['sheetRange']='!A11:Z11';s['publishRange']=f"'Видео'!{chr(65+video_index)}11"
 s['paragraphs']=[{k:v for k,v in segment.items() if k!='alignment'} for segment in segments]
 save(out/'scenario.json',s);save(out/'code-source.json',s['code']['source'])
 save(out/'timeline.json',{'paragraphs':s['paragraphs'],'events':s['events'],'captionEvents':s['captionEvents'],'duration':clock})

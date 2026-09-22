@@ -4,6 +4,7 @@ Run with google-sheets-mcp's Python. No automatic paid retries.
 """
 import argparse,asyncio,base64,json,sys,time,urllib.request,urllib.error
 from pathlib import Path
+from material_paths import material_dir
 from mcp import ClientSession,StdioServerParameters
 from mcp.client.stdio import stdio_client
 
@@ -39,7 +40,7 @@ async def main():
    scene=None
    if not args.audio_only:
     scene=Path(rows[1][2]); assert scene.is_file() and scene.suffix=='.drawio'
-   out=ROOT/'output'/f'scene-row{args.row:03d}-{time.time_ns()}'
+   out=material_dir()/f'scene-row{args.row:03d}-{time.time_ns()}'
    out.mkdir()
    (out/'sheet-source.json').write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8')
    if scene: (out/'source.drawio').write_bytes(scene.read_bytes())

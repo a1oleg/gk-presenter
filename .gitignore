@@ -20,3 +20,4 @@ models/
 *.safetensors
 *.trec
 *.7z
+tmp/onedrive-*.json

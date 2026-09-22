@@ -1,19 +1,20 @@
 """Snapshot scenario rows; synthesize missing paragraphs once, without paid retries."""
 import asyncio,base64,json,shutil,time,urllib.request,sys
 from pathlib import Path
+from material_paths import material_dir
 from mcp import ClientSession,StdioServerParameters
 from mcp.client.stdio import stdio_client
 ROOT=Path(__file__).resolve().parents[1]
 SID='1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
 def save(p,v):p.write_text(json.dumps(v,ensure_ascii=False,indent=2),encoding='utf8')
 async def main():
- out=Path(sys.argv[1]) if len(sys.argv)>1 else ROOT/'output'/f'fisher-sequence-A1-N9-{time.time_ns()}'
+ out=Path(sys.argv[1]) if len(sys.argv)>1 else material_dir()/f'fisher-sequence-A1-N9-{time.time_ns()}'
  out.mkdir(exist_ok=True)
  if not (out/'scenario-source.json').exists():
   async with stdio_client(StdioServerParameters(command='C:/GitHub/google-sheets-mcp/.venv/Scripts/python.exe',args=['C:/GitHub/google-sheets-mcp/server.py'])) as (r,w):
    async with ClientSession(r,w) as c:
     await c.initialize()
-    for notation,name in [("'ФЙ-сценарий'!A1:N9",'scenario-source.json'),('!A11:L11','sheet-source.json')]:
+    for notation,name in [("'ФЙ-сценарий'!A1:N9",'scenario-source.json'),('!A11:Z11','sheet-source.json'),('!A1:Z1','sheet-headers.json')]:
      result=await c.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':SID,'notation':notation})
      assert not result.isError;save(out/name,json.loads(result.content[0].text))
  print('OUTPUT='+str(out),flush=True)
