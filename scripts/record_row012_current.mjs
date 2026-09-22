@@ -21,6 +21,10 @@ try {
   await step({surface:'editor',action:'openDiagram',filePath:'graph/draw/generated/Fisher-Yates.drawio'});
   await step({surface:'diagram',action:'dismissMenu'});
   await step({surface:'diagram',action:'presentFocus',stableId:run.loop,cellId:'f0-n4',scale:0.6});
+  const readFrame=async()=>bridge({...base,surface:'diagram',action:'presentRead',stableId:run.loop,cellId:'f0-n4'});
+  const initialFrame=await readFrame();
+  assert(initialFrame.visible,'Loop is outside the initial viewport');
+  await step({surface:'diagram',action:'presentPointer',stableId:run.loop,cellId:'f0-n4',pointerId:'narrator',text:'for'});
   const {sceneItems}=await obs.request('GetSceneItemList',{sceneName:'coldKode A12'});
   const capture=sceneItems.find(i=>i.sourceName==='coldKode presentation capture');
   if(!capture||capture.sceneItemTransform.sourceWidth<=0)throw Error('Empty capture');
@@ -39,12 +43,22 @@ try {
   events.length=0;
   await obs.request('StartRecord');owned=true;started=performance.now();
   const cameras=[];
-  const readCamera=async()=> (await bridge({...base,surface:'diagram',action:'presentRead',stableId:run.loop,cellId:'f0-n4'})).camera;
+  const readCamera=async()=> {
+    const frame=await readFrame();
+    assert(frame.visible,'Loop left the visible viewport');
+    for(const key of ['x','y','width','height']) assert(Math.abs(frame.screenBounds[key]-initialFrame.screenBounds[key])<1,'Loop moved on screen: '+key);
+    return frame.screenBounds;
+  };
   for(const [at,input] of schedule){
     await sleep(Math.max(0,at*1000-(performance.now()-started)));
     const before=input.action==='selectCase'?await readCamera():null;
     await step(input);
+    if(input.action==='menuClick'){
+      await sleep(300);
+      await readCamera();
+    }
     if(before){
+      await bridge({...base,surface:'diagram',action:'presentPointer',stableId:run.loop,cellId:'f0-n4',pointerId:'narrator',visible:false});
       await sleep(200);
       const after=await readCamera();
       cameras.push({index:input.index,before,after});
