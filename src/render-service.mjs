@@ -20,7 +20,7 @@ export async function renderScene({sceneDir,mode='video',time=0,filename,signal,
  if(!Number.isFinite(scene.duration)||scene.duration<=0||scene.duration>3600)throw Error('Invalid scene duration');
  if(!Number.isFinite(time)||time<0||time>=scene.duration)throw Error('Preview time outside scene');
  const name=filename||(mode==='video'?'scene.mp4':`preview-${Math.round(time*1000)}.png`);
- if(path.basename(name)!==name||!name.endsWith(mode==='video'?'.mp4':'.png'))throw Error('Invalid output filename');
+ if(typeof name!=='string'||/[<>:"/\\|?*\x00-\x1f]/.test(name)||path.basename(name)!==name||!name.endsWith(mode==='video'?'.mp4':'.png'))throw Error('Invalid output filename');
  const destination=path.join(out,name);
  try{await fs.access(destination);throw Error('Output already exists; choose a new filename');}catch(e){if(e.code!=='ENOENT')throw e;}
  const prep=await json(path.join(out,'scene-preparation.json')),recording=await fs.realpath(prep.recording);
@@ -49,7 +49,7 @@ export async function renderScene({sceneDir,mode='video',time=0,filename,signal,
   await page.exposeFunction('emitFrame',async(frame,data)=>{
    checkAbort(signal);rendered++;if(mode==='preview'&&sent)return;if(encoderError)throw encoderError;
    await new Promise((resolve,reject)=>encoder.stdin.write(Buffer.from(data.split(',')[1],'base64'),e=>e?reject(e):resolve()));
-   sent++;onProgress({frames:sent,total:mode==='preview'?1:Math.ceil(scene.duration*30),phase:'rendering'});
+   sent++;onProgress({frames:sent,total:mode==='preview'?1:Math.ceil(scene.duration*30)+1,phase:'rendering'});
   });
   await page.goto('http://127.0.0.1:9031/render.html');
   await page.waitForFunction(()=>typeof window.renderCaptions==='function',null,{timeout:30000});

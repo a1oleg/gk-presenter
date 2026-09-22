@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
+    "render:serve": "node scripts/serve-render.mjs",
     "check": "node src/check-lesson.mjs examples/lesson.json"
   },
   "engines": { "node": ">=22" }
