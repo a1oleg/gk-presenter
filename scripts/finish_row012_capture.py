@@ -8,12 +8,21 @@ import imageio_ffmpeg
 
 out = Path(sys.argv[1]).resolve()
 recording = json.loads((out / 'recording.json').read_text(encoding='utf-8'))
-assert [e['input'].get('index') for e in recording['events'] if e['input']['action'] == 'selectCase'] == [0, 1, 3, 6, 7]
+plan = json.loads((out/'scene-preparation.json').read_text(encoding='utf-8'))
+if plan['sheet']['row'] == 14:
+    assert recording['completed'] and recording['initialCase'] == 0
+    assert [e['input'].get('id') for e in recording['events']] == ['segment-1', 'segment-2']
+    assert all(len(e['result']['pointerSamples']) >= 3 for e in recording['events'])
+    duration = recording['duration']
+else:
+    assert plan['sheet']['row'] == 12
+    assert [e['input'].get('index') for e in recording['events'] if e['input']['action'] == 'selectCase'] == [0, 1, 3, 6, 7]
+    duration = 25.46
 video = out / 'scene-interactive.mp4'
 subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), '-hide_banner', '-loglevel', 'error', '-n',
                 '-i', recording['outputPath'], '-i', str(out / 'speech.mp3'),
                 '-map', '0:v:0', '-map', '1:a:0', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k',
-                '-af', 'apad', '-t', '25.46', '-movflags', '+faststart', str(video)], check=True)
+                '-af', 'apad', '-t', str(duration), '-movflags', '+faststart', str(video)], check=True)
 samples = []
 frames = 0
 with av.open(str(video)) as container:
@@ -31,7 +40,7 @@ with av.open(str(video)) as container:
             assert variance > 20, 'Blank or uniform captured frame'
             samples.append({'frame': frames, 'mean': mean, 'variance': variance})
         frames += 1
-    assert abs(frames/30-25.46) < 0.15
+    assert abs(frames/30-duration) < 0.15
 with av.open(str(video)) as container:
     audio_frames = sum(1 for _ in container.decode(audio=0))
 assert audio_frames > 0
