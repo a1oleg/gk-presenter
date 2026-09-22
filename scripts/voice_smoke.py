@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """CPU-only non-commercial XTTS smoke test. Never uploads source audio.
 
 Run --prepare-only first to make a candidate reference, then listen to it.
@@ -31,7 +32,7 @@ def main():
     source_audio = args.audio_file.resolve() if args.audio_file else Path(config['audioPath'])
     if not source_audio.is_file():
         raise FileNotFoundError(source_audio)
-    output = ROOT / 'output' / f'voice-test-{time.time_ns()}'
+    output = material_dir('output') / f'voice-test-{time.time_ns()}'
     output.mkdir(parents=True)
     reference = output / 'reference.wav'
     import imageio_ffmpeg

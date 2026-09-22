@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Local CPU transcript draft with timestamps; no source audio is uploaded."""
 import argparse
 import json
@@ -19,7 +20,7 @@ def main():
         p.error('start >= 0; seconds in (0,120]')
     cfg = json.loads((ROOT / 'sources.local.json').read_text(encoding='utf-8'))
     source = str(args.audio_file.resolve()) if args.audio_file else cfg['audioPath']
-    out = ROOT / 'output' / f'transcript-{time.time_ns()}'
+    out = material_dir('output') / f'transcript-{time.time_ns()}'
     out.mkdir(parents=True)
     import imageio_ffmpeg
     clip = out / 'source.wav'

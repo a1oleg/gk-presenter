@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Map completed videos in the narration sheet to their existing metadata folders."""
 import asyncio, json, sys
 from pathlib import Path
@@ -7,7 +8,7 @@ from mcp.client.stdio import stdio_client
 sys.stdout.reconfigure(encoding='utf-8')
 ROOT=Path(__file__).resolve().parents[1]
 SID='1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
-OUT=ROOT/'output'/'scene-metadata-folder-links'
+OUT=material_dir('output')/'scene-metadata-folder-links'
 
 if '--plan' in sys.argv:
     data=json.loads((OUT/'before.json').read_text(encoding='utf8'))

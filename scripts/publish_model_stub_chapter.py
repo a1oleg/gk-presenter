@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Read or narrowly replace the requested narration column via the Sheets MCP."""
 import asyncio, json, sys
 sys.stdout.reconfigure(encoding='utf-8')
@@ -7,7 +8,7 @@ from mcp.client.stdio import stdio_client
 
 ROOT = Path(__file__).resolve().parents[1]
 SID = '1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
-OUT = ROOT / 'output' / 'model-stub-chapter'
+OUT = material_dir('output') / 'model-stub-chapter'
 
 async def main():
     async with stdio_client(StdioServerParameters(

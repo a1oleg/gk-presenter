@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Inventory an archive without unpacking or modifying any original files."""
 import collections
 import json
@@ -49,7 +50,7 @@ with zipfile.ZipFile(archive) as bundle:
             'sourceMatchCaveat': 'Filename matching is not a checksum or media-decoding integrity check.',
             'timingCaveat': 'Clip extent is not a verified export duration; hidden tracks and export range may differ.',
         })
-out = ROOT / 'output' / 'camtasia-inventory.json'
+out = material_dir('output') / 'camtasia-inventory.json'
 out.parent.mkdir(parents=True, exist_ok=True)
 out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
 print(json.dumps(report, ensure_ascii=True, indent=2))

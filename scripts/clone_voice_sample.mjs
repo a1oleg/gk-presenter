@@ -1,3 +1,4 @@
+import {materialDir} from '../src/material-paths.mjs';
 // Create a separate IVC voice, then reuse an existing narration request for comparison.
 // No automatic retries: an ambiguous response must be checked before running again.
 import fs from 'node:fs/promises';
@@ -11,7 +12,7 @@ const entry=entries.find(line=>line.startsWith('ELEVENLABS_API_KEY='));
 const key=entry?.slice(entry.indexOf('=')+1).trim().replace(/^["']|["']$/g,'');
 if(!key)throw new Error('API key missing');
 const sample=await fs.readFile(samplePath);
-const out=path.join(root,'output',`${customName ? 'voice-mix-comparison' : 'voice2-comparison'}-${Date.now()}`);
+const out=path.join(materialDir('output'),`${customName ? 'voice-mix-comparison' : 'voice2-comparison'}-${Date.now()}`);
 await fs.mkdir(out);
 const name=customName || 'Oleg - Voice 2 - recording 2';
 const form=new FormData();form.append('name',name);form.append('description','User-authorized voice comparison; existing voices preserved.');form.append('remove_background_noise','false');form.append('files',new Blob([sample],{type:path.extname(samplePath)==='.wav'?'audio/wav':'audio/mp4'}),path.basename(samplePath));

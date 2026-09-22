@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Capture current video links without modifying the narration sheet."""
 import asyncio,json,sys,time
 from pathlib import Path
@@ -12,7 +13,7 @@ async def main():
             res=await c.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':'1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw','notation':'!A1:K100'})
             assert not res.isError
             data=json.loads(res.content[0].text)
-            path=ROOT/'output'/f'ready-scenes-{time.time_ns()}.json'
+            path=material_dir('output')/f'ready-scenes-{time.time_ns()}.json'
             path.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8')
             rows=[i+1 for i,row in enumerate(data['values']) if i and len(row)>7 and row[7]]
             print(json.dumps({'snapshot':str(path),'rows':rows}))

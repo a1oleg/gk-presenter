@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Compile speech alignment, sheet snapshots and real source targets into one scene."""
 import copy,json,subprocess,sys,wave
 from pathlib import Path
@@ -5,7 +6,7 @@ import imageio_ffmpeg
 ROOT=Path(__file__).resolve().parents[1];out=Path(sys.argv[1]).resolve()
 def load(p):return json.loads(p.read_text(encoding='utf8'))
 def save(p,v):p.write_text(json.dumps(v,ensure_ascii=False,indent=2),encoding='utf8')
-s=load(ROOT/'output/caption-clearance-1790062901829/scenario.json')
+s=load(material_dir('output') / 'caption-clearance-1790062901829/scenario.json')
 rows=load(out/'scenario-source.json')['values'];sheet=load(out/'sheet-source.json')['values'][0]
 assert sheet[5]==s['diagram']['top'] and sheet[6]==s['diagram']['bottom'] and sheet[7]==s['diagram']['rightmost'],'Framing selectors changed'
 ff=imageio_ffmpeg.get_ffmpeg_exe();chunks=[];segments=[];clock=0

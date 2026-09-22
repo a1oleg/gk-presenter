@@ -17,7 +17,7 @@ async def main():
    video_index=headers['values'][0].index('ссылка на видео');video_column=chr(65+video_index)
    sheet_range=f'!A11:{video_column}11'
    snap=await read(sheet_range);script=await read("'ФЙ-сценарий'!A1:N4")
-   old=ROOT/'output/scene-row011-captions-1790056098495880100'
+   old=material_dir('output') / 'scene-row011-captions-1790056098495880100'
    assert json.loads((old/'request.json').read_text(encoding='utf8'))['text']==script['values'][3][0], 'Narration changed; do not reuse stale audio'
    out=material_dir()/f'scene-row011-motion-{time.time_ns()}';out.mkdir()
    save(out/'sheet-source.json',snap);save(out/'scenario-source.json',script);save(out/'sheet-headers.json',headers)

@@ -1,10 +1,11 @@
+from material_paths import material_dir
 """Remove the final sentence at its aligned boundary; no speech generation."""
 import json,subprocess,time
 from pathlib import Path
 import av,imageio_ffmpeg
 root=Path(__file__).resolve().parents[1]
-source=root/'output/scene-row008-background-1789453393461204500'
-out=root/'output'/f'scene-row008-trimmed-{time.time_ns()}';out.mkdir()
+source=material_dir('output') / 'scene-row008-background-1789453393461204500'
+out=material_dir('output')/f'scene-row008-trimmed-{time.time_ns()}';out.mkdir()
 alignment=json.loads((source/'alignment.json').read_text(encoding='utf8'))
 a=alignment['alignment'];text=''.join(a['characters']);index=text.index('В упрощённом виде')
 cut=a['character_start_times_seconds'][index]-.04

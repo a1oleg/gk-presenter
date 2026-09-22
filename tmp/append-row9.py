@@ -1,3 +1,7 @@
+import sys as _material_sys
+from pathlib import Path as _MaterialPath
+_material_sys.path.insert(0,str(_MaterialPath(__file__).resolve().parents[1]/'scripts'))
+from material_paths import material_dir
 import asyncio, base64, json, subprocess, time, urllib.request, sys
 from pathlib import Path
 import av, imageio_ffmpeg
@@ -19,9 +23,9 @@ async def main():
    tail=row[0].strip().splitlines()[-1]
    assert tail=='А если оставшийся index больше нуля, то пойдёт на новый виток цикла.'
    assert row[8]=='3.3'
-   source=ROOT/'output/scene-row009-headroom-20260921/scene.mp4'
-   original=json.loads((ROOT/'output/scene-row009-1789994254508946500/request.json').read_text(encoding='utf8'))
-   out=(Path(sys.argv[1]) if len(sys.argv)>1 else ROOT/'output'/f'scene-row009-appended-{time.time_ns()}').resolve();out.mkdir(exist_ok=True)
+   source=material_dir('output') / 'scene-row009-headroom-20260921/scene.mp4'
+   original=json.loads((material_dir('output') / 'scene-row009-1789994254508946500/request.json').read_text(encoding='utf8'))
+   out=(Path(sys.argv[1]) if len(sys.argv)>1 else material_dir('output')/f'scene-row009-appended-{time.time_ns()}').resolve();out.mkdir(exist_ok=True)
    print(str(out),flush=True); save(out/'sheet-source.json',snap)
    payload={k:original[k] for k in ('model_id','voice_settings')}
    payload['text']=tail.replace('index','и́ндекс')

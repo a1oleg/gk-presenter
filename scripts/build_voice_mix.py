@@ -1,8 +1,9 @@
+from material_paths import material_dir
 """Alternate original recordings at detected pauses, 60 seconds per source."""
 import json,re,subprocess,time,hashlib
 from pathlib import Path
 import av,imageio_ffmpeg
-root=Path(__file__).resolve().parents[1];out=root/'output'/f'voice-mix-{time.time_ns()}';out.mkdir()
+root=Path(__file__).resolve().parents[1];out=material_dir('output')/f'voice-mix-{time.time_ns()}';out.mkdir()
 sources=[Path('C:/Users/a1ole/Documents/Звукозаписи')/f'{n}.m4a' for n in (1,2)]
 ff=imageio_ffmpeg.get_ffmpeg_exe();cuts=[]
 for src in sources:

@@ -1,3 +1,4 @@
+import {materialDir} from '../src/material-paths.mjs';
 // Bind only an exact, live presentation window. Never fall back to another Code window.
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -17,7 +18,7 @@ try {
  const windows=propertyItems.filter(i=>i.itemEnabled&&i.itemName.includes('coldKode PRESENTATION'));
  if(windows.length!==1)throw Error('Expected exactly one live coldKode PRESENTATION window');
  const original=await obs.request('GetInputSettings',{inputName});
- const out=path.resolve('output',`obs-presentation-${Date.now()}`);await fs.mkdir(out,{recursive:true});
+ const out=path.join(materialDir('output'),`obs-presentation-${Date.now()}`);await fs.mkdir(out,{recursive:true});
  await fs.writeFile(path.join(out,'previous-settings.json'),JSON.stringify({sceneName,inputName,...original,sceneItem:enabled[0]},null,2));
  await obs.request('SetInputSettings',{inputName,inputSettings:{window:windows[0].itemValue,priority:0},overlay:true});
  const after=await obs.request('GetInputSettings',{inputName});

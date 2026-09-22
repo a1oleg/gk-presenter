@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Make mild pitch comparisons with preserved tempo and formants; never overwrite."""
 import argparse
 import hashlib
@@ -20,7 +21,7 @@ def main():
     source = args.source.resolve()
     original_hash = hashlib.sha256(source.read_bytes()).hexdigest()
     samples, rate = sf.read(source, always_2d=True)
-    output = ROOT / 'output' / f'pitch-compare-{time.time_ns()}'
+    output = material_dir('output') / f'pitch-compare-{time.time_ns()}'
     output.mkdir(parents=True)
     report = {'source': str(source), 'sourceSha256': original_hash,
               'formants': 'preserved', 'tempo': 1, 'licenseScope': 'non-commercial XTTS test', 'variants': []}

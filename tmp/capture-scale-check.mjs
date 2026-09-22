@@ -1,7 +1,8 @@
+import {materialDir} from '../src/material-paths.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {connectObs} from '../scripts/obs_control.mjs';
-const out=path.resolve('output',`scale-check-${Date.now()}`);
+const out=path.join(materialDir('output'),`scale-check-${Date.now()}`);
 await fs.mkdir(out,{recursive:true});
 const obs=await connectObs();
 try {

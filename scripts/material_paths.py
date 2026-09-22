@@ -5,6 +5,7 @@ REPO = Path(__file__).resolve().parents[1]
 def material_dir(kind='output'):
     if kind not in ('output','data'): raise ValueError(kind)
     config = REPO/'materials.local.json'
-    target = Path(json.loads(config.read_text(encoding='utf-8-sig'))[kind]) if config.exists() else REPO/kind
+    if not config.exists(): raise FileNotFoundError('Configure materials.local.json before generating materials')
+    target = Path(json.loads(config.read_text(encoding='utf-8-sig'))[kind])
     target.mkdir(parents=True,exist_ok=True)
     return target.resolve()

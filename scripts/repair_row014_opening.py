@@ -1,9 +1,10 @@
+from material_paths import material_dir
 """Regenerate only the opening clause and keep the later narration at its original times."""
 import base64,json,subprocess,time,urllib.request
 from pathlib import Path
 import imageio_ffmpeg
-root=Path(__file__).resolve().parents[1];source=root/'output/scene-row014-1789457488582307400'
-out=root/'output'/f'row014-opening-repair-{time.time_ns()}';out.mkdir()
+root=Path(__file__).resolve().parents[1];source=material_dir('output') / 'scene-row014-1789457488582307400'
+out=material_dir('output')/f'row014-opening-repair-{time.time_ns()}';out.mkdir()
 original=json.loads((source/'request.json').read_text(encoding='utf8'))
 alignment=json.loads((source/'alignment.json').read_text(encoding='utf8'))['alignment']
 text=''.join(alignment['characters']);split=text.index('покажу');cut=alignment['character_start_times_seconds'][split]

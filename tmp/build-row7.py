@@ -1,3 +1,7 @@
+import sys as _material_sys
+from pathlib import Path as _MaterialPath
+_material_sys.path.insert(0,str(_MaterialPath(__file__).resolve().parents[1]/'scripts'))
+from material_paths import material_dir
 import asyncio,base64,json,subprocess,time,urllib.request,sys
 from pathlib import Path
 from mcp import ClientSession,StdioServerParameters
@@ -18,10 +22,10 @@ async def main():
    replacements={'Claude Code':'Клод Код',**({'for':'фор','true':'тру','false':'фолс'} if ROW==9 else {})}
    spoken=text
    for term,pronunciation in replacements.items():spoken=spoken.replace(term,pronunciation)
-   out=ROOT/'output'/f'scene-row{ROW:03d}-{time.time_ns()}';out.mkdir();print('OUTPUT='+str(out),flush=True)
+   out=material_dir('output')/f'scene-row{ROW:03d}-{time.time_ns()}';out.mkdir();print('OUTPUT='+str(out),flush=True)
    (out/'sheet-source.json').write_text(json.dumps(snap,ensure_ascii=False,indent=2),encoding='utf8')
    env=dict(l.split('=',1) for l in (ROOT/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in l and not l.lstrip().startswith('#'));key=env['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")
-   voice=json.loads((ROOT/'output/voice-mix-comparison-1789454509647/voice.local.json').read_text())['voice_id']
+   voice=json.loads((material_dir('output') / 'voice-mix-comparison-1789454509647/voice.local.json').read_text())['voice_id']
    payload={'text':spoken,'model_id':'eleven_v3','voice_settings':{'stability':0.5,'similarity_boost':1.0}}
    (out/'pronunciation.json').write_text(json.dumps({'displayText':text,'replacements':replacements},ensure_ascii=False,indent=2),encoding='utf8')
    (out/'request.json').write_text(json.dumps({'voice_id':voice,**payload},ensure_ascii=False,indent=2),encoding='utf8')

@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Replace a short clip's speech with a local synthesized WAV, preserving picture timing."""
 import argparse
 import json
@@ -36,7 +37,7 @@ def main():
     tempo = 1 if args.natural_timing else info.duration / (speech_end - args.speech_start)
     if not 0.75 <= tempo <= 1.3:
         raise RuntimeError(f'Timing needs excessive stretch ({tempo:.3f}); adjust text or clip, not picture speed')
-    out = ROOT / 'output' / f'revoice-{time.time_ns()}'
+    out = material_dir('output') / f'revoice-{time.time_ns()}'
     out.mkdir(parents=True)
     ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
     def run(options):

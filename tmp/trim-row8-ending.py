@@ -1,3 +1,7 @@
+import sys as _material_sys
+from pathlib import Path as _MaterialPath
+_material_sys.path.insert(0,str(_MaterialPath(__file__).resolve().parents[1]/'scripts'))
+from material_paths import material_dir
 import asyncio, json, subprocess, time
 from pathlib import Path
 import av, imageio_ffmpeg
@@ -29,7 +33,7 @@ async def main():
             next_start=align['character_start_times_seconds'][idx]
             cutoff=end+max(0,min(.18,(next_start-end)/2))
             assert 0<cutoff<=next_start
-            out=ROOT/'output'/f'scene-row008-trimmed-{time.time_ns()}';out.mkdir()
+            out=material_dir('output')/f'scene-row008-trimmed-{time.time_ns()}';out.mkdir()
             video=out/'scene.mp4'
             subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(),'-nostdin','-n','-hide_banner','-loglevel','error','-i',str(source),'-t',str(cutoff),'-map','0:v:0','-map','0:a:0','-c:v','libx264','-preset','fast','-crf','18','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-movflags','+faststart',str(video)],check=True)
             with av.open(str(video)) as m:

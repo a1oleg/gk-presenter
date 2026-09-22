@@ -1,3 +1,7 @@
+import sys as _material_sys
+from pathlib import Path as _MaterialPath
+_material_sys.path.insert(0,str(_MaterialPath(__file__).resolve().parents[1]/'scripts'))
+from material_paths import material_dir
 import asyncio,base64,json,subprocess,time,urllib.request,sys
 from pathlib import Path
 import av,imageio_ffmpeg
@@ -15,11 +19,11 @@ async def main():
     out=Path(sys.argv[1]).resolve();snap=json.loads((out/'sheet-source.json').read_text(encoding='utf8'));scenario=json.loads((out/'scenario-source.json').read_text(encoding='utf8'))
    else:
     snap=await read('!A11:K11');scenario=await read("'ФЙ-сценарий'!A1:N4")
-    out=ROOT/'output'/f'scene-row011-captions-{time.time_ns()}';out.mkdir();save(out/'sheet-source.json',snap);save(out/'scenario-source.json',scenario)
+    out=material_dir('output')/f'scene-row011-captions-{time.time_ns()}';out.mkdir();save(out/'sheet-source.json',snap);save(out/'scenario-source.json',scenario)
    print('OUTPUT='+str(out),flush=True)
    rows=scenario['values'];text=rows[3][0];assert snap['values'][0][9]=='3.3'
    if not (out/'speech.mp3').exists():
-    voice=json.loads((ROOT/'output/scene-row009-1789994254508946500/request.json').read_text(encoding='utf8'))['voice_id']
+    voice=json.loads((material_dir('output') / 'scene-row009-1789994254508946500/request.json').read_text(encoding='utf8'))['voice_id']
     payload={'text':text,'model_id':'eleven_v3','voice_settings':{'stability':.5,'similarity_boost':1.0}};save(out/'request.json',{'voice_id':voice,**payload})
     env=dict(l.split('=',1) for l in (ROOT/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in l and not l.lstrip().startswith('#'))
     req=urllib.request.Request(f'https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format=mp3_44100_128',data=json.dumps(payload).encode(),headers={'xi-api-key':env['ELEVENLABS_API_KEY'].strip().strip('"').strip("'"),'Content-Type':'application/json'},method='POST')

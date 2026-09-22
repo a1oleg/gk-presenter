@@ -1,13 +1,14 @@
+from material_paths import material_dir
 """Regenerate only the opening clause; retain the original narration tail."""
 import base64,json,subprocess,time,urllib.request
 from pathlib import Path
 import imageio_ffmpeg
 root=Path(__file__).resolve().parents[1]
-source=root/'output/scene-row027-1789562286740338700'
+source=material_dir('output') / 'scene-row027-1789562286740338700'
 original=json.loads((source/'request.json').read_text(encoding='utf8'))
 assert original['text'].startswith('Если описать весь граф кода,')
 payload={'text':'Если описать весь граф ко́да,','model_id':original['model_id'],'voice_settings':original['voice_settings']}
-out=root/'output'/f'row027-stress-repair-{time.time_ns()}';out.mkdir()
+out=material_dir('output')/f'row027-stress-repair-{time.time_ns()}';out.mkdir()
 (out/'request.json').write_text(json.dumps({'voice_id':original['voice_id'],**payload},ensure_ascii=False,indent=2),encoding='utf8')
 entries=dict(line.split('=',1) for line in (root/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in line and not line.lstrip().startswith('#'))
 key=entries['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")

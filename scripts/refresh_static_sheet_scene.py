@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Replace the screenshot only; retain the existing audio link and guard sheet edits.
 
 Run with google-sheets-mcp's Python. Current columns: B scene, C cursor,
@@ -20,7 +21,7 @@ async def main():
    snapshot=json.loads(result.content[0].text);values=snapshot['values'][0]
    assert values[2:4]==(['да','нет'] if args.pointer_plan else ['нет','нет']),'Scene flags do not match requested rendering mode'
    source=Path(values[1].strip().strip('"'));audio=Path(values[5]);assert source.is_file() and audio.is_file()
-   out=ROOT/'output'/f'scene-row{args.row:03d}-background-{time.time_ns()}';out.mkdir()
+   out=material_dir('output')/f'scene-row{args.row:03d}-background-{time.time_ns()}';out.mkdir()
    (out/'sheet-source.json').write_text(json.dumps(snapshot,ensure_ascii=False,indent=2),encoding='utf8')
    if args.pointer_plan:
     shutil.copyfile(audio,out/'speech.mp3')

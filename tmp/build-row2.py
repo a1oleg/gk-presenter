@@ -1,3 +1,7 @@
+import sys as _material_sys
+from pathlib import Path as _MaterialPath
+_material_sys.path.insert(0,str(_MaterialPath(__file__).resolve().parents[1]/'scripts'))
+from material_paths import material_dir
 import asyncio,base64,json,subprocess,time,urllib.request
 from pathlib import Path
 from mcp import ClientSession,StdioServerParameters
@@ -15,12 +19,12 @@ async def main():
    snap=await read(); row=snap['values'][1]
    assert snap['values'][0][:9]==['текст','сцена','стартовый узел','масштаб VS code','указка','интерактив','код','голос','ссылка на видео']
    assert row[1:8]==['VS Code OBS\nGoogle Slides OBS','services/api/claude.ts:1051:5:1051:27','75','нет','нет','нет','3.3']
-   out=ROOT/'output'/f'scene-row002-{time.time_ns()}';out.mkdir()
+   out=material_dir('output')/f'scene-row002-{time.time_ns()}';out.mkdir()
    (out/'sheet-source.json').write_text(json.dumps(snap,ensure_ascii=False,indent=2),encoding='utf8')
    subprocess.run(['node',str(ROOT/'tmp/capture-row2.mjs'),str(out)],check=True)
    env=dict(l.split('=',1) for l in (ROOT/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in l and not l.lstrip().startswith('#'))
    key=env['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")
-   voice=json.loads((ROOT/'output/voice-mix-comparison-1789454509647/voice.local.json').read_text())['voice_id']
+   voice=json.loads((material_dir('output') / 'voice-mix-comparison-1789454509647/voice.local.json').read_text())['voice_id']
    payload={'text':row[0].strip(),'model_id':'eleven_v3','voice_settings':{'stability':0.5,'similarity_boost':1.0}}
    (out/'request.json').write_text(json.dumps({'voice_id':voice,**payload},ensure_ascii=False,indent=2),encoding='utf8')
    print('OUTPUT='+str(out),flush=True)

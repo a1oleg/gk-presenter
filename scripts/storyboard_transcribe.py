@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Resumable local full-video transcription in bounded chunks; no cloud upload."""
 import json
 import os
@@ -9,7 +10,7 @@ import imageio_ffmpeg
 
 ROOT = Path(__file__).resolve().parents[1]
 source = Path(json.loads((ROOT / 'sources.local.json').read_text(encoding='utf-8'))['videoPath'])
-out = ROOT / 'output/storyboard-coldKode2'
+out = material_dir('output') / 'storyboard-coldKode2'
 out.mkdir(exist_ok=True)
 with av.open(str(source)) as media:
     duration = media.duration / 1_000_000

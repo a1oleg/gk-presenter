@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Build reviewed paragraph manifest, video stills and a local review gallery."""
 import concurrent.futures
 import html
@@ -8,7 +9,7 @@ import imageio_ffmpeg
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / 'output/storyboard-coldKode2'
+OUT = material_dir('output') / 'storyboard-coldKode2'
 source = Path(json.loads((OUT/'source.json').read_text())['path'])
 snapshot = json.loads((OUT/'sheet-before.json').read_text(encoding='utf-8'))
 prefix_times = [(0,5.12),(5.7,9.9),(10.4,22.18),(22.74,40.6),(40.9,54.1),(54.1,63.2),(64,80.3),(81.7,96),(96.6,120.1),(120.68,133.78),(134.24,157.92)]

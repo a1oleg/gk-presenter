@@ -1,3 +1,7 @@
+import sys as _material_sys
+from pathlib import Path as _MaterialPath
+_material_sys.path.insert(0,str(_MaterialPath(__file__).resolve().parents[1]/'scripts'))
+from material_paths import material_dir
 import asyncio, base64, json, re, subprocess, time, urllib.request
 from pathlib import Path
 import av, imageio_ffmpeg
@@ -30,7 +34,7 @@ async def main():
             old_video = Path(row[9])
             assert old_video.is_file() and old_video.parent.name == 'scene-row008-1789992257969326200'
             preparation = json.loads((old_video.parent/'scene-preparation.json').read_text(encoding='utf8'))
-            out = ROOT/'output'/f'scene-row008-phonetic-{time.time_ns()}'
+            out = material_dir('output')/f'scene-row008-phonetic-{time.time_ns()}'
             out.mkdir()
             print('OUTPUT='+str(out), flush=True)
             save(out/'sheet-source.json', snapshot)
@@ -38,7 +42,7 @@ async def main():
             save(out/'pronunciation.json', {'displayText': row[0], 'spokenText': text, 'replacements': REPLACEMENTS})
             env = dict(l.split('=',1) for l in (ROOT/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in l and not l.lstrip().startswith('#'))
             key = env['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")
-            voice = json.loads((ROOT/'output/voice-mix-comparison-1789454509647/voice.local.json').read_text())['voice_id']
+            voice = json.loads((material_dir('output') / 'voice-mix-comparison-1789454509647/voice.local.json').read_text())['voice_id']
             payload = {'text': text, 'model_id': 'eleven_v3', 'voice_settings': {'stability': 0.5, 'similarity_boost': 1.0}}
             save(out/'request.json', {'voice_id': voice, **payload})
             req = urllib.request.Request(f'https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format=mp3_44100_128', data=json.dumps(payload).encode(), headers={'xi-api-key':key,'Content-Type':'application/json'}, method='POST')

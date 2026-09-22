@@ -1,3 +1,7 @@
+import sys as _material_sys
+from pathlib import Path as _MaterialPath
+_material_sys.path.insert(0,str(_MaterialPath(__file__).resolve().parents[1]/'scripts'))
+from material_paths import material_dir
 import asyncio,json,time,shutil,subprocess,os,hashlib
 from pathlib import Path
 from mcp import ClientSession,StdioServerParameters
@@ -10,7 +14,7 @@ async def main():
    data=json.loads((await c.call_tool('get_sheet_data_by_notation',params)).content[0].text)
    for rownum in range(2,6):
     row=data['values'][rownum-1];old=Path(row[9]).parent
-    out=ROOT/'output'/f'scene-row{rownum:03d}-1080-{time.time_ns()}';out.mkdir()
+    out=material_dir('output')/f'scene-row{rownum:03d}-1080-{time.time_ns()}';out.mkdir()
     print('OUTPUT='+str(out),flush=True)
     for name in ['speech.mp3','alignment.json','request.json']:shutil.copyfile(old/name,out/name)
     assert hashlib.sha256((old/'speech.mp3').read_bytes()).digest()==hashlib.sha256((out/'speech.mp3').read_bytes()).digest()

@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Publish the requested six narration paragraphs only; preserve all other columns."""
 import asyncio,json,time
 from pathlib import Path
@@ -16,7 +17,7 @@ async def main():
    rows=snapshot['values']
    expected=['Теперь сделаем диаграммы "говорящими".','\\','','','','']
    assert [(row[0] if row else '') for row in rows]==expected,'Narration changed; do not overwrite'
-   out=root/'output'/f'fisher-annotation-script-{time.time_ns()}';out.mkdir()
+   out=material_dir('output')/f'fisher-annotation-script-{time.time_ns()}';out.mkdir()
    (out/'before.json').write_text(json.dumps(snapshot,ensure_ascii=False,indent=2),encoding='utf8')
    fresh=await c.call_tool('get_sheet_data_by_notation',params)
    assert json.loads(fresh.content[0].text)['values']==rows,'Sheet changed'

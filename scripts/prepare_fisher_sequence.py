@@ -19,7 +19,7 @@ async def main():
      assert not result.isError;save(out/name,json.loads(result.content[0].text))
  print('OUTPUT='+str(out),flush=True)
  rows=json.loads((out/'scenario-source.json').read_text(encoding='utf8'))['values']
- old=ROOT/'output/scene-row011-captions-1790056098495880100'
+ old=material_dir('output') / 'scene-row011-captions-1790056098495880100'
  voice=json.loads((old/'request.json').read_text(encoding='utf8'))['voice_id']
  entries=dict(line.split('=',1) for line in (ROOT/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in line and not line.lstrip().startswith('#'))
  key=entries['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")

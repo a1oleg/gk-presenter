@@ -1,14 +1,15 @@
+from material_paths import material_dir
 """Replace only final phrase, retaining the original video and narration prefix."""
 import base64,json,subprocess,time,urllib.request
 from pathlib import Path
 import av,imageio_ffmpeg
-root=Path(__file__).resolve().parents[1];source=root/'output/scene-row028-1789625221129126900'
+root=Path(__file__).resolve().parents[1];source=material_dir('output') / 'scene-row028-1789625221129126900'
 original=json.loads((source/'request.json').read_text(encoding='utf8'))
 a=json.loads((source/'alignment.json').read_text(encoding='utf8'))['alignment'];text=''.join(a['characters'])
 phrase='в графе зависимостей';fixed='в гра́фе зависимостей'
 i=text.index(phrase);previous=a['character_end_times_seconds'][i-1];start=(previous+a['character_start_times_seconds'][i])/2
 payload={'text':'Улучшить ранжирование кандидатов за счёт их близости в гра́фе зависимостей.','model_id':original['model_id'],'voice_settings':original['voice_settings']}
-out=root/'output'/f'row028-stress-repair-{time.time_ns()}';out.mkdir()
+out=material_dir('output')/f'row028-stress-repair-{time.time_ns()}';out.mkdir()
 (out/'request.json').write_text(json.dumps({'voice_id':original['voice_id'],**payload},ensure_ascii=False,indent=2),encoding='utf8')
 entries=dict(line.split('=',1) for line in (root/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in line and not line.lstrip().startswith('#'))
 key=entries['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")

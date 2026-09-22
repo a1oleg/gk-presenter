@@ -1,9 +1,10 @@
+from material_paths import material_dir
 """Keep the second part of the existing take, repair only its closing sentence."""
 import base64,json,subprocess,time,urllib.request
 from pathlib import Path
 import av,imageio_ffmpeg
 root=Path(__file__).resolve().parents[1]
-source=root/'output/scene-row032-1789632865176707200'
+source=material_dir('output') / 'scene-row032-1789632865176707200'
 original=json.loads((source/'request.json').read_text(encoding='utf8'))
 a=json.loads((source/'alignment.json').read_text(encoding='utf8'))['alignment']
 text=''.join(a['characters'])
@@ -14,7 +15,7 @@ def boundary(phrase):
 start=boundary('И конечно же')
 end=boundary('Перед вами эта функция')
 payload={'text':'Перед вами эта функция, которая называется он сабми́т.','model_id':original['model_id'],'voice_settings':original['voice_settings']}
-out=root/'output'/f'row033-onsubmit-repair-{time.time_ns()}';out.mkdir()
+out=material_dir('output')/f'row033-onsubmit-repair-{time.time_ns()}';out.mkdir()
 (out/'request.json').write_text(json.dumps({'voice_id':original['voice_id'],**payload},ensure_ascii=False,indent=2),encoding='utf8')
 entries=dict(line.split('=',1) for line in (root/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in line and not line.lstrip().startswith('#'))
 key=entries['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")

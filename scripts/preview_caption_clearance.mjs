@@ -1,3 +1,4 @@
+import {materialDir} from '../src/material-paths.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {Client} from '../../drawio-inspector/node_modules/@modelcontextprotocol/sdk/dist/esm/client/index.js';
@@ -20,7 +21,7 @@ try{
  const previousX=s.captions.rect.x;s.captions.rect.x=Math.ceil(right+34);
  s.captions.design='compact';s.captions.rect.width=1240;
  if(s.captions.rect.x+s.captions.rect.width>1896)throw Error('Caption exceeds frame');
- const out=path.resolve('output',`caption-clearance-${Date.now()}`);await fs.mkdir(out);
+ const out=path.join(materialDir('output'),`caption-clearance-${Date.now()}`);await fs.mkdir(out);
  await fs.writeFile(path.join(out,'scenario.json'),JSON.stringify(s,null,2));
  await fs.writeFile(path.join(out,'clearance.json'),JSON.stringify({previousX,x:s.captions.rect.x,nodeRight:right,gap:s.captions.rect.x-right,recording:path.resolve(prep.recording),original,geometrySource:'drawio-inspector MCP'},null,2));
  console.log(out);

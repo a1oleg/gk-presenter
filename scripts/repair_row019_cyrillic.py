@@ -1,8 +1,9 @@
+from material_paths import material_dir
 """Replace one clause, retaining later narration times and all video packets."""
 import base64,json,subprocess,time,urllib.request,urllib.error
 from pathlib import Path
 import imageio_ffmpeg
-root=Path(__file__).resolve().parents[1];source=root/'output/scene-row019-1789539624179143600'
+root=Path(__file__).resolve().parents[1];source=material_dir('output') / 'scene-row019-1789539624179143600'
 original=json.loads((source/'request.json').read_text(encoding='utf8'))
 a=json.loads((source/'alignment.json').read_text(encoding='utf8'))['alignment'];text=''.join(a['characters'])
 phrase='Это значит что аннотатор может передать код функции getRandom в Модель c заданием написать аннотацию,'
@@ -12,7 +13,7 @@ previous=max(i for i in range(s) if text[i].isalnum());following=next(i for i in
 start=(a['character_end_times_seconds'][previous]+a['character_start_times_seconds'][s])/2
 end=a['character_start_times_seconds'][following]-.04;slot=end-start
 payload={'text':fixed,'previous_text':text[:s],'next_text':text[e:],'model_id':original['model_id'],'voice_settings':original['voice_settings']}
-out=root/'output'/f'row019-cyrillic-repair-{time.time_ns()}';out.mkdir()
+out=material_dir('output')/f'row019-cyrillic-repair-{time.time_ns()}';out.mkdir()
 (out/'request.json').write_text(json.dumps({'voice_id':original['voice_id'],**payload},ensure_ascii=False,indent=2),encoding='utf8')
 entries=dict(line.split('=',1) for line in (root/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in line and not line.lstrip().startswith('#'))
 key=entries['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")

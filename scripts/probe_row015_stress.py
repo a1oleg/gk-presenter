@@ -1,10 +1,11 @@
+from material_paths import material_dir
 """One audio-only stress probe; no sheet or video changes, no paid retries."""
 import base64,json,time,urllib.request
 from pathlib import Path
 import av
 
 root=Path(__file__).resolve().parents[1]
-source=root/'output/scene-row015-1789459950600238400'
+source=material_dir('output') / 'scene-row015-1789459950600238400'
 original=json.loads((source/'request.json').read_text(encoding='utf8'))
 phrase='и размечается в графе.'
 assert original['text'].count(phrase)==1
@@ -16,7 +17,7 @@ payload={
  'model_id':original['model_id'],
  'voice_settings':original['voice_settings'],
 }
-out=root/'output'/f'row015-stress-probe-{time.time_ns()}'
+out=material_dir('output')/f'row015-stress-probe-{time.time_ns()}'
 out.mkdir()
 (out/'request.json').write_text(json.dumps({'voice_id':original['voice_id'],**payload},ensure_ascii=False,indent=2),encoding='utf8')
 entries=dict(line.split('=',1) for line in (root/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in line and not line.lstrip().startswith('#'))

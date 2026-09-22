@@ -1,8 +1,9 @@
+from material_paths import material_dir
 """Repair the missing final м, preserving the existing introduction timeline."""
 import base64,json,subprocess,time,urllib.request
 from pathlib import Path
 import imageio_ffmpeg
-root=Path(__file__).resolve().parents[1];source=root/'output/elevenlabs-intro-1789371724606891200';video=root/'output/scene-row002-1789379845586042600/scene-static.mp4'
+root=Path(__file__).resolve().parents[1];source=material_dir('output') / 'elevenlabs-intro-1789371724606891200';video=material_dir('output') / 'scene-row002-1789379845586042600/scene-static.mp4'
 original=json.loads((source/'request.json').read_text(encoding='utf8'))
 old='а потом перейдём к исходника Claude Code,';fixed='а потом перейдём к исходникам Claude Code,'
 assert original['text'].count(old)==1
@@ -10,7 +11,7 @@ before,after=original['text'].split(old)
 # Local Whisper word boundaries: previous word ends 7.96, next starts 10.32.
 start=8.03;end=10.24;slot=end-start
 payload={'text':fixed,'previous_text':before,'next_text':after,'model_id':original['model_id'],'language_code':'ru','voice_settings':original['voice_settings']}
-out=root/'output'/f'row002-ending-repair-{time.time_ns()}';out.mkdir()
+out=material_dir('output')/f'row002-ending-repair-{time.time_ns()}';out.mkdir()
 (out/'request.json').write_text(json.dumps({'voice_id':original['voice_id'],**payload},ensure_ascii=False,indent=2),encoding='utf8')
 entries=dict(line.split('=',1) for line in (root/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in line and not line.lstrip().startswith('#'))
 key=entries['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")

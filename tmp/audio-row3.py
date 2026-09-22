@@ -1,3 +1,7 @@
+import sys as _material_sys
+from pathlib import Path as _MaterialPath
+_material_sys.path.insert(0,str(_MaterialPath(__file__).resolve().parents[1]/'scripts'))
+from material_paths import material_dir
 import asyncio,base64,json,time,urllib.request
 from pathlib import Path
 from mcp import ClientSession,StdioServerParameters
@@ -11,9 +15,9 @@ async def main():
    snap=json.loads(result.content[0].text);row=snap['values'][2]
    assert row[1:9]==['VS Code OBS','services/api/claude.ts:1051:5:1051:27','services/api/claude.ts:1063:10:1066:5','75','1','нет','нет','3.3']
    text=row[0].replace('функции с которой','функции, с которой').replace('пользователь подключившийся','пользователь, подключившийся').replace('проверяется не','проверяется, не').replace('модель .','модель.').replace(' \n','\n').strip()
-   out=ROOT/'output'/f'scene-row003-{time.time_ns()}';out.mkdir()
+   out=material_dir('output')/f'scene-row003-{time.time_ns()}';out.mkdir()
    (out/'sheet-source.json').write_text(json.dumps(snap,ensure_ascii=False,indent=2),encoding='utf8')
-   voice=json.loads((ROOT/'output/voice-mix-comparison-1789454509647/voice.local.json').read_text())['voice_id']
+   voice=json.loads((material_dir('output') / 'voice-mix-comparison-1789454509647/voice.local.json').read_text())['voice_id']
    env=dict(l.split('=',1) for l in (ROOT/'.env').read_text(encoding='utf-8-sig').splitlines() if '=' in l and not l.lstrip().startswith('#'));key=env['ELEVENLABS_API_KEY'].strip().strip('"').strip("'")
    payload={'text':text,'model_id':'eleven_v3','voice_settings':{'stability':0.5,'similarity_boost':1.0}}
    (out/'request.json').write_text(json.dumps({'voice_id':voice,**payload},ensure_ascii=False,indent=2),encoding='utf8')

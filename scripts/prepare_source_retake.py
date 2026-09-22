@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Snapshot the live row and reuse its existing audio/alignment without another TTS call."""
 import asyncio,json,shutil,time,argparse
 from pathlib import Path
@@ -11,7 +12,7 @@ async def main():
    await c.initialize();result=await c.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':'1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw','notation':f'!A{a.row-1}:H{a.row+1}'});assert not result.isError
    data=json.loads(result.content[0].text);row=data['values'][1];audio=Path(row[6]);assert audio.is_file()
    request=json.loads((audio.parent/'request.json').read_text(encoding='utf8'));assert request['text']==row[0],'Narration changed: do not reuse audio'
-   out=root/'output'/f'scene-row{a.row:03d}-retake-{time.time_ns()}';out.mkdir()
+   out=material_dir('output')/f'scene-row{a.row:03d}-retake-{time.time_ns()}';out.mkdir()
    for name in ['speech.mp3','alignment.json','request.json']:shutil.copyfile(audio.parent/name,out/name)
    (out/'sheet-source.json').write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf8')
    print(str(out))

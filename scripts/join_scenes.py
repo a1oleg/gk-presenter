@@ -1,3 +1,4 @@
+from material_paths import material_dir
 """Join scenes in the supplied order, retaining exact frame counts and cut timing."""
 import argparse,hashlib,json,subprocess,time
 from pathlib import Path
@@ -9,7 +10,7 @@ parser.add_argument('videos',type=Path,nargs='*')
 parser.add_argument('--sheet-snapshot',type=Path)
 args=parser.parse_args()
 root=Path(__file__).resolve().parents[1]
-out=root/'output'/f'joined-scenes-{time.time_ns()}'
+out=material_dir('output')/f'joined-scenes-{time.time_ns()}'
 out.mkdir()
 records=[];inputs=[];filters=[];streams=[];cursor=0
 rows=[]

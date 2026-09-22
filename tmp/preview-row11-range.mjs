@@ -1,3 +1,4 @@
+import {materialDir} from '../src/material-paths.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {Client} from '../../drawio-inspector/node_modules/@modelcontextprotocol/sdk/dist/esm/client/index.js';
@@ -6,7 +7,7 @@ import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentatio
 import {connectObs} from '../scripts/obs_control.mjs';
 const file='C:/GitHub/coldKode/graph/draw/generated/Fisher-Yates.drawio';
 const upper=process.argv[2],lower=process.argv[3];
-const out=path.resolve('output',`range-preview-${Date.now()}`);await fs.mkdir(out);
+const out=path.join(materialDir('output'),`range-preview-${Date.now()}`);await fs.mkdir(out);
 const client=new Client({name:'presenter-range-preview',version:'1.0'});
 await client.connect(new StdioClientTransport({command:'node',args:['C:/GitHub/drawio-inspector/src/mcp.mjs']}));
 async function inspect(selector){const r=await client.callTool({name:'inspect_element',arguments:{file,mode:'xml',...selector}});if(r.isError)throw Error(JSON.stringify(r));return JSON.parse(r.content.find(c=>c.type==='text').text);}

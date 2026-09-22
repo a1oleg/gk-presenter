@@ -21,3 +21,4 @@ models/
 *.trec
 *.7z
 tmp/onedrive-*.json
+tmp/material-path-migration-originals/

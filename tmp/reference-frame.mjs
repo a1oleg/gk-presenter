@@ -1,8 +1,9 @@
+import {materialDir} from '../src/material-paths.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {bridge} from '../../coldKode/graph/presentation/presentation.mjs';
 import {connectObs} from '../scripts/obs_control.mjs';
-const out=path.resolve('output',`reference-frame-${Date.now()}`);await fs.mkdir(out);
+const out=path.join(materialDir('output'),`reference-frame-${Date.now()}`);await fs.mkdir(out);
 const obs=await connectObs();
 try{
  if((await obs.request('GetRecordStatus')).outputActive)throw Error('Recording active');

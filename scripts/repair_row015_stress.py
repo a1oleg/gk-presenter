@@ -1,11 +1,12 @@
+from material_paths import material_dir
 """Insert approved stress probe, preserving the timeline and video packets."""
 import json,subprocess,time
 from pathlib import Path
 import imageio_ffmpeg
 
 root=Path(__file__).resolve().parents[1]
-source=root/'output/scene-row015-1789459950600238400'
-probe=root/'output/row015-stress-probe-1789460213909341000'
+source=material_dir('output') / 'scene-row015-1789459950600238400'
+probe=material_dir('output') / 'row015-stress-probe-1789460213909341000'
 a=json.loads((source/'alignment.json').read_text(encoding='utf8'))['alignment']
 text=''.join(a['characters']);phrase='и размечается в графе.'
 assert text.count(phrase)==1
@@ -22,7 +23,7 @@ probe_start=max(0,b['character_start_times_seconds'][first]-.015)
 probe_end=b['character_end_times_seconds'][last]+.035
 slot=end-start;tempo=max(1,(probe_end-probe_start)/slot)
 assert 0<slot and tempo<1.2, 'Approved probe does not fit without excessive acceleration'
-out=root/'output'/f'row015-stress-repair-{time.time_ns()}';out.mkdir()
+out=material_dir('output')/f'row015-stress-repair-{time.time_ns()}';out.mkdir()
 ff=imageio_ffmpeg.get_ffmpeg_exe()
 filters=f'[0:a]atrim=end={start},asetpts=PTS-STARTPTS[head];[1:a]atrim=start={probe_start}:end={probe_end},asetpts=PTS-STARTPTS,atempo={tempo},afade=t=in:d=0.005,apad,atrim=duration={slot}[fix];[0:a]atrim=start={end},asetpts=PTS-STARTPTS[tail];[head][fix][tail]concat=n=3:v=0:a=1[out]'
 subprocess.run([ff,'-hide_banner','-loglevel','error','-n','-i',str(source/'speech.mp3'),'-i',str(probe/'speech.mp3'),'-filter_complex',filters,'-map','[out]','-c:a','pcm_s16le',str(out/'speech.wav')],check=True)
