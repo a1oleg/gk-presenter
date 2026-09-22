@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath,pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
+import {inspectionCacheDir} from '../src/diagnostic-cache.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const inspector=path.resolve(root,'../drawio-inspector');
 const require=createRequire(path.join(inspector,'package.json'));
@@ -21,7 +22,9 @@ try {
  for(const [name,args] of [['inspect_region',{cellId:process.argv[3]||'228',padding:10000}],['validate_geometry',{}]]) {
   const r=await client.callTool({name,arguments:{file,mode:'rendered',limit:500,...args}},undefined,{timeout:180000});
   if(r.isError)throw Error(JSON.stringify(r.content));
-  await fs.writeFile(path.join(out,`${name}.json`),JSON.stringify(r.structuredContent,null,2));
+  const reportDir=name==='inspect_region'?inspectionCacheDir(out):out;
+  await fs.mkdir(reportDir,{recursive:true});
+  await fs.writeFile(path.join(reportDir,`${name}.json`),JSON.stringify(r.structuredContent,null,2));
   console.log(name,JSON.stringify(name==='inspect_region'?{count:r.structuredContent.elements.length}:r.structuredContent));
  }
 }finally{await client.close();}
