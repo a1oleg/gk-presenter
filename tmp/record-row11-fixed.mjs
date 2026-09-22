@@ -7,11 +7,14 @@ const fn=idx.cells.find(c=>c.cellId==='f0-n1').stableId.replace(/:flow-start$/,'
 const a=JSON.parse(await fs.readFile(path.join(out,'alignment.json'),'utf8')).alignment,text=a.characters.join('');
 const source=await fs.readFile('C:/GitHub/coldKode/examples/fisher-yates/src/shuffle.ts','utf8'),lines=source.split(/\r?\n/);
 function sourceId(line,token){const col=lines[line-1].indexOf(token);if(col<0)throw Error('Missing source token');return `examples/fisher-yates/src/shuffle.ts:${line}:${col}:${line}:${col+token.length}`;}
-const cues=[['массив','f0-n2-part-1',26,'alphabet'],['объект','f0-n3-part-1',25,'current.index']].map(([anchor,id,line,token])=>{const i=text.indexOf(anchor),cell=idx.cells.find(c=>c.cellId===id);if(i<0||!cell)throw Error('Missing cue');return {...cell,anchor,time:a.character_start_times_seconds[i],sourceStableId:sourceId(line,token)};});
+const scenario=await fs.readFile(path.join(out,'scenario.json'),'utf8').then(JSON.parse).catch(()=>null);
+const entries=scenario?scenario.events.map(e=>[e.atWord,e.diagramCell,e.codeLine,e.codeToken]):[['массив','f0-n2-part-1',26,'alphabet'],['объект','f0-n3-part-1',25,'current.index']];
+const cues=entries.map(([anchor,id,line,token])=>{const i=text.indexOf(anchor),cell=idx.cells.find(c=>c.cellId===id);if(i<0||!cell)throw Error('Missing cue');return {...cell,anchor,time:a.character_start_times_seconds[i],sourceStableId:sourceId(line,token)};});
 const send=(action,c,extra={})=>bridge({surface:'diagram',action,functionStableId:fn,stableId:c.stableId,cellId:c.cellId,...extra});
 const pointCode=c=>bridge({surface:'editor',action:'sourcePointer',functionStableId:fn,stableId:c.sourceStableId});
 const before=await send('presentRead',cues[0]);
 const codeBefore=await pointCode(cues[0]);
+if(scenario&&(!scenario.code.layout.safe||scenario.code.layout.calibration.visibleStartLine!==codeBefore.visibleStartLine))throw Error('Code viewport no longer matches validated caption layout');
 await send('presentPointer',cues[0],{durationMs:0});
 const obs=await connectObs();let active=false;
 try{

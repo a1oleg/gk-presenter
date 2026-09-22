@@ -1,0 +1,16 @@
+import fs from 'node:fs/promises';import path from 'node:path';
+import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {loadDiagram} from '../../drawio-inspector/src/inspector.mjs';
+import {captionLayout} from '../src/caption-layout.mjs';
+const out=path.resolve(process.argv[2]),file=path.join(out,'scenario.json'),s=JSON.parse(await fs.readFile(file,'utf8'));
+const d=await loadDiagram('C:/GitHub/coldKode/'+s.diagram.file),idx=await diagramIndex({file:s.diagram.file});
+const top=d.cells.find(c=>c.kind==='vertex'&&c.stableId===s.diagram.top),fn=idx.cells.find(c=>c.cellId==='f0-n1').stableId.replace(/:flow-start$/,'');
+if(!top)throw Error('Upper endpoint missing');
+const {camera}=await bridge({surface:'diagram',action:'presentRead',functionStableId:fn,stableId:top.stableId,cellId:top.id});
+const code=await bridge({surface:'editor',action:'sourcePointer',functionStableId:fn,stableId:'examples/fisher-yates/src/shuffle.ts:25:8:25:21'});
+const anchor={x:(top.bounds.x+camera.translate.x)*camera.scale-camera.scrollLeft+16,y:(top.bounds.y+camera.translate.y)*camera.scale-camera.scrollTop+90,width:top.bounds.width*camera.scale,height:top.bounds.height*camera.scale};
+const layout=captionLayout({anchor,canvas:s.canvas,code:{targetLine:s.code.targetLine,visibleStartLine:code.visibleStartLine,lineHeight:28,viewportTop:48,coordinateSource:'1920x1032 VS Code capture; cropTop132, OBS y90; editor top90; conservative first-line clipping'}});
+await fs.writeFile(path.join(out,'layout-check.json'),JSON.stringify({...layout,camera,anchor},null,2));
+if(!layout.safe)throw Error('Code must move down '+layout.requiredDownwardPixels+' output pixels to clear captions');
+s.captions.rect=layout.rect;s.code.layout=layout;s.diagram.camera=camera;
+await fs.writeFile(file,JSON.stringify(s,null,2));console.log(layout);
