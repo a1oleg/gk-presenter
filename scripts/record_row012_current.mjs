@@ -1,11 +1,15 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import {parseArgs} from 'node:util';
 import {bridge} from '../../coldKode/graph/presentation/presentation.mjs';
 import {applyPreparedScene,checkPreparedScene,loadPreparedScene} from '../src/scene-staging.mjs';
 import {connectObs} from './obs_control.mjs';
 
-const out=path.resolve(process.argv[2]);
+const {values:options,positionals}=parseArgs({allowPositionals:true,options:{'menu-slide-ms':{type:'string',default:'1000'},'case-slide-ms':{type:'string',default:'500'},'transfer-ms':{type:'string',default:'400'}}});
+const motion=Object.fromEntries(Object.entries(options).map(([k,v])=>[k,Number(v)]));
+assert(Object.values(motion).every(v=>Number.isFinite(v)&&v>=100&&v<=1500),'Pointer durations must be 100..1500 ms');
+const out=path.resolve(positionals[0]);
 const {plan}=await loadPreparedScene(out);
 if(plan.sheet.row!==12)throw Error('This interactive timeline is for row 12 only');
 const sheet=JSON.parse(await fs.readFile(path.join(out,'scene-sheet-source.json'),'utf8'));
@@ -23,6 +27,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const obs=await connectObs();let owned=false;
 try {
   if((await obs.request('GetRecordStatus')).outputActive)throw Error('OBS already recording');
+  await step({surface:'editor',action:'openDiagram',filePath:plan.source});
+  await step({surface:'diagram',action:'contextMenu',cellId:'f0-n4'});
+  await step({surface:'diagram',action:'menuClick',label:'показать статистику Цикла'});
+  await step({surface:'runtime',action:'waitForAnalysis',sessionId:run.sessionId});
   await step({surface:'runtime',action:'selectAll',sessionId:run.sessionId});
   await applyPreparedScene(out);
   await step({surface:'diagram',action:'dismissMenu'});
@@ -39,6 +47,7 @@ try {
   await obs.request('SetRecordDirectory',{recordDirectory:out});
   const schedule=[
     [anchor('откроем'),{surface:'diagram',action:'contextMenu',cellId:'f0-n4'}],
+    [anchor('откроем')+0.55,{surface:'diagram',action:'menuHover',label:'показать статистику Цикла',durationMs:motion['menu-slide-ms']}],
     [anchor('Здесь')-0.25,{surface:'diagram',action:'menuClick',label:'показать статистику Цикла'}],
     [anchor('вот первый'),{surface:'runtime',action:'selectCase',index:0,sessionId:run.sessionId}],
     [anchor('Нажимая'),{surface:'runtime',action:'selectCase',index:1,sessionId:run.sessionId}],
@@ -46,11 +55,15 @@ try {
     [anchor('все ветки'),{surface:'runtime',action:'selectCase',index:6,sessionId:run.sessionId}],
     [anchor('до последнего'),{surface:'runtime',action:'selectCase',index:7,sessionId:run.sessionId}],
   ];
+  schedule.push([anchor('вот первый')-(motion['case-slide-ms']+motion['transfer-ms'])/1000-0.25,{surface:'diagram',action:'cursorExit',durationMs:motion['transfer-ms']}]);
+  for(const event of schedule)if(event[1].action==='selectCase'){event[0]-=motion['case-slide-ms']/1000;event[1].durationMs=motion['case-slide-ms'];}
+  schedule.sort((a,b)=>a[0]-b[0]);
   await fs.writeFile(path.join(out,'capture-plan.json'),JSON.stringify({sessionId:run.sessionId,schedule},null,2));
   events.length=0;
   await checkPreparedScene(out);
   await obs.request('StartRecord');owned=true;started=performance.now();
   const cameras=[];
+  let transfer=null;
   const readCamera=async()=> {
     const frame=await readFrame();
     assert(frame.visible,'Loop left the visible viewport');
@@ -60,7 +73,10 @@ try {
   for(const [at,input] of schedule){
     await sleep(Math.max(0,at*1000-(performance.now()-started)));
     const before=input.action==='selectCase'?await readCamera():null;
-    await step(input);
+    if(input.action==='selectCase'&&input.index===0)input.pointer={yFraction:transfer.yFraction};
+    const result=await step(input);
+    if(input.action==='cursorExit')transfer=result;
+    if(input.durationMs)assert((result.pointerSamples||result.samples||[]).length>=3,'Pointer motion has too few frames');
     if(input.action==='menuClick'){
       await sleep(300);
       await readCamera();

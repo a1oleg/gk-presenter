@@ -1,5 +1,6 @@
 """Read the current scene through MCP and synthesize once without editing Sheets."""
 import asyncio
+import argparse
 import base64
 import json
 import sys
@@ -16,6 +17,11 @@ from material_paths import material_dir
 ROOT = Path(__file__).resolve().parents[1]
 SHEETS = ROOT.parent / 'google-sheets-mcp'
 SID = '1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
+parser = argparse.ArgumentParser()
+parser.add_argument('--row', type=int, default=12)
+args = parser.parse_args()
+if args.row < 2:
+    parser.error('row must be >= 2')
 
 
 def save(path, value):
@@ -28,7 +34,7 @@ async def main():
     async with stdio_client(params) as (reader, writer):
         async with ClientSession(reader, writer) as client:
             await client.initialize()
-            for name, notation in [('headers', '!A1:Z1'), ('scene', '!A12:L12')]:
+            for name, notation in [('headers', '!A1:Z1'), ('scene', f'!A{args.row}:M{args.row}')]:
                 result = await client.call_tool('get_sheet_data_by_notation', {'spreadsheet_id': SID, 'notation': notation})
                 if result.isError:
                     raise RuntimeError(str(result.content))
@@ -45,7 +51,7 @@ async def main():
     check = urllib.request.Request(f'https://api.elevenlabs.io/v1/voices/{voice}', headers={'xi-api-key': key})
     with urllib.request.urlopen(check, timeout=30) as response:
         json.load(response)
-    out = material_dir() / f'scene-row012-{time.time_ns()}'
+    out = material_dir() / f'scene-row{args.row:03d}-{time.time_ns()}'
     out.mkdir()
     save(out / 'sheet-source.json', snapshots)
     payload = {'text': row[0].strip(), 'model_id': 'eleven_v3', 'voice_settings': {'stability': 0.5, 'similarity_boost': 1.0}}
