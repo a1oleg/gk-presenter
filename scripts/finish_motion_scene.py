@@ -8,7 +8,7 @@ assert scene['code']['layout']['safe']
 ff=imageio_ffmpeg.get_ffmpeg_exe()
 speech=out/('speech.wav' if (out/'speech.wav').exists() else 'speech.mp3')
 if not video.exists():
- subprocess.run([ff,'-nostdin','-n','-hide_banner','-loglevel','error','-i',prep['recording'],'-framerate','30','-i',str(out/'caption-frames/%05d.png'),'-i',str(speech),'-filter_complex','[0:v]fps=30,setsar=1[v];[v][1:v]overlay=0:0:format=auto[out]','-map','[out]','-map','2:a','-af','apad','-t',str(scene['duration']),'-c:v','libx264','-preset','fast','-crf','18','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-movflags','+faststart',str(video)],check=True)
+ subprocess.run(['node',str(Path(__file__).resolve().parent/'render_motion_captions.mjs'),str(out)],check=True)
 with av.open(str(video)) as media:
  assert (media.streams.video[0].width,media.streams.video[0].height)==(1920,1080)
  frames=0
