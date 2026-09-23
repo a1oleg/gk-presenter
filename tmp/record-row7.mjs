@@ -1,12 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {connectObs} from '../scripts/obs_control.mjs';
 const out=process.argv[2],fn='examples/fisher-yates/src/shuffle.ts:6:7:33:1';
 const a=JSON.parse(await fs.readFile(path.join(out,'alignment.json'),'utf8')).alignment,text=a.characters.join('');
 const setId='examples/fisher-yates/src/shuffle.ts:11:8:11:16';
 const idx=await diagramIndex({file:'graph/draw/generated/Fisher-Yates.drawio'});
-const lines=(await fs.readFile('C:/GitHub/coldKode/examples/fisher-yates/src/shuffle.ts','utf8')).split(/\r?\n/);
+const lines=(await fs.readFile('C:/GitHub/graphKoda/examples/fisher-yates/src/shuffle.ts','utf8')).split(/\r?\n/);
 function cue(anchor,cellId,line,token){const col=lines[line-1].indexOf(token);if(col<0)throw Error('Source token missing');const cell=idx.cells.find(c=>c.cellId===cellId);if(!cell)throw Error('Diagram target missing');return {anchor,cellId,stableId:cell.stableId,sourceStableId:`examples/fisher-yates/src/shuffle.ts:${line}:${col}:${line}:${col+token.length}`};}
 const currentCues=[
  cue('Следующим шагом','f0-n3-part-1',16,'current'),
@@ -47,7 +47,7 @@ try{
  const items=await obs.request('GetSceneItemList',{sceneName});const item=items.sceneItems.find(x=>x.sourceName==='VS Code OBS');
  const settings=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});
  const windows=await obs.request('GetInputPropertiesListPropertyItems',{inputName:'VS Code OBS',propertyName:'window'});
- if(!windows.propertyItems.some(x=>x.itemEnabled&&x.itemValue===settings.inputSettings.window&&x.itemName.includes('coldKode PRESENTATION')))throw Error('Presentation window unavailable');
+ if(!windows.propertyItems.some(x=>x.itemEnabled&&x.itemValue===settings.inputSettings.window&&x.itemName.includes('graphKoda PRESENTATION')))throw Error('Presentation window unavailable');
  const {sourceWidth:w,sourceHeight:h}=item.sceneItemTransform;if(w!==1920||h!==1032)throw Error('Unexpected source size');
  await fs.writeFile(path.join(out,'obs-before.json'),JSON.stringify(items,null,2));
  const s=item.sceneItemTransform.scaleX;

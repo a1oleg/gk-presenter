@@ -5,7 +5,7 @@ import {StdioClientTransport} from '../../drawio-inspector/node_modules/@modelco
 import {parseDiagram} from '../../drawio-inspector/src/xml.mjs';
 import {resolveViewer} from '../../drawio-inspector/src/render.mjs';
 import {materialDir} from '../src/material-paths.mjs';
-const files=['C:/GitHub/coldKode/graph/draw/generated/Fisher-Yates.drawio','C:/GitHub/coldKode/graph/draw/FY-sequence.drawio'];
+const files=['C:/GitHub/graphKoda/graph/draw/generated/Fisher-Yates.drawio','C:/GitHub/graphKoda/graph/draw/FY-sequence.drawio'];
 const out=path.join(materialDir(),`fisher-flow-sequence-${Date.now()}`);await fs.mkdir(out);
 const c=new Client({name:'fisher-morph-check',version:'1'});await c.connect(new StdioClientTransport({command:'node',args:['C:/GitHub/drawio-inspector/src/mcp.mjs']}));
 const reports=[];let anchors;
@@ -43,7 +43,7 @@ try{
   await page.screenshot({path:path.join(out,i?'sequence.png':'flow.png')});
  }
 }finally{await browser.close();}
-const ff=execFileSync('C:/GitHub/coldKode-presenter/.venv/Scripts/python.exe',['-c','import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())'],{encoding:'utf8'}).trim();
+const ff=execFileSync('C:/GitHub/graphKoda-presenter/.venv/Scripts/python.exe',['-c','import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())'],{encoding:'utf8'}).trim();
 execFileSync(ff,['-hide_banner','-loglevel','error','-n','-loop','1','-framerate','30','-t','4','-i',path.join(out,'flow.png'),'-loop','1','-framerate','30','-t','4','-i',path.join(out,'sequence.png'),'-filter_complex','[0:v][1:v]xfade=transition=fade:duration=2:offset=2,format=yuv420p[v]','-map','[v]','-t','6','-c:v','libx264','-crf','18',path.join(out,'transition.mp4')],{windowsHide:true});
 await fs.writeFile(path.join(out,'scenario.json'),JSON.stringify({files,camera,anchors,transition:{kind:'fade',start:2,duration:2,total:6}},null,2));
 console.log(JSON.stringify({out,anchors,findings:reports[0].findings}));

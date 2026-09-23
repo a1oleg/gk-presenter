@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {readScene,renderScene} from '../../coldKode/graph/scene/scene.mjs';
+import {readScene,renderScene} from '../../graphKoda/graph/scene/scene.mjs';
 const out=path.resolve(process.argv[2]);
 const scene=await readScene('fisher');scene.pointers={};
-const files=['../coldKode/graph/draw/scenes/fisher.drawio','../coldKode/graph/draw/generated/Fisher-Yates.drawio'];
+const files=['../graphKoda/graph/draw/scenes/fisher.drawio','../graphKoda/graph/draw/generated/Fisher-Yates.drawio'];
 const sources=[];
 for(const file of files)sources.push({file:path.resolve(file),sha256:createHash('sha256').update(await fs.readFile(file)).digest('hex')});
 for(const name of ['detail','overview','annotated'])await fs.mkdir(path.join(out,name),{recursive:true});

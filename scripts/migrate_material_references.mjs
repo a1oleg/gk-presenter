@@ -18,14 +18,14 @@ for(const rel of tracked.filter(f=>/^(scripts|tmp)\/.*\.(py|mjs)$/.test(f))){
   }
  }else{
   text=text.replace(/path\.(?:resolve|join)\((?:(?:root|ROOT),\s*)?(['"])(output|data)\1\s*,/g,(_,q,kind)=>{used=true;return `path.join(materialDir('${kind}'),`;});
-  text=text.replace(/`C:\/GitHub\/coldKode-presenter\/(output|data)\//g,(_,kind)=>{used=true;return '`'+'${materialDir(\''+kind+'\')}/';});
+  text=text.replace(/`C:\/GitHub\/graphKoda-presenter\/(output|data)\//g,(_,kind)=>{used=true;return '`'+'${materialDir(\''+kind+'\')}/';});
   if(used&&!/import \{materialDir\}/.test(text))text="import {materialDir} from '../src/material-paths.mjs';\n"+text;
  }
  if(text!==before)save(path.resolve(rel),text);
 }
-const oldRoots=['C:/GitHub/coldKode-presenter/','C:\\GitHub\\coldKode-presenter\\'];
+const oldRoots=['C:/GitHub/graphKoda-presenter/','C:\\GitHub\\graphKoda-presenter\\'];
 function remap(value){if(typeof value!=='string')return value;const normal=value.replaceAll('\\','/');
- for(const kind of ['output','data'])for(const prefix of [`C:/GitHub/coldKode-presenter/${kind}/`,`${kind}/`,`../${kind}/`])if(normal.startsWith(prefix))return config[kind]+'/'+normal.slice(prefix.length);
+ for(const kind of ['output','data'])for(const prefix of [`C:/GitHub/graphKoda-presenter/${kind}/`,`${kind}/`,`../${kind}/`])if(normal.startsWith(prefix))return config[kind]+'/'+normal.slice(prefix.length);
  return value;}
 function walk(value){if(Array.isArray(value))return value.map(walk);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,walk(v)]));return remap(value);}
 function files(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?files(path.join(dir,e.name)):[path.join(dir,e.name)]);}

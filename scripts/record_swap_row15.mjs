@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';import path from 'node:path';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {connectObs} from './obs_control.mjs';
 import {materialDir} from '../src/material-paths.mjs';
 const out=path.resolve(process.argv[2]),read=async f=>JSON.parse(await fs.readFile(f,'utf8'));
@@ -19,7 +19,7 @@ const before=await camera(),events=[],obs=await connectObs();let owned=false,rec
 const move=async cue=>{const diagram=await bridge({surface:'diagram',action:'presentPointer',functionStableId:owner,...cue,pointerId:'narrator',durationMs:250});const code=await bridge({surface:'editor',action:'sourcePointer',functionStableId:owner,stableId:cue.sourceStableId});return {diagram,code};};
 try{
  if((await obs.request('GetRecordStatus')).outputActive)throw Error('OBS already recording');
- const settings=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});if(!settings.inputSettings.window.includes('coldKode PRESENTATION'))throw Error('Wrong capture window');
+ const settings=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});if(!settings.inputSettings.window.includes('graphKoda PRESENTATION'))throw Error('Wrong capture window');
  await move(cues[0]);await obs.request('StartRecord');owned=true;const started=performance.now();
  for(const cue of cues){const delay=cue.time*1000-(performance.now()-started);if(delay>0)await new Promise(r=>setTimeout(r,delay));events.push({...cue,result:await move(cue)});console.log('Cue: '+cue.cellId);}
  const remaining=duration*1000-(performance.now()-started);if(remaining>0)await new Promise(r=>setTimeout(r,remaining));

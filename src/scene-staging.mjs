@@ -2,11 +2,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {frameSheetScene} from '../../coldKode/dev/frameSheetScene.mjs';
-import {bridge} from '../../coldKode/graph/presentation/presentation.mjs';
+import {frameSheetScene} from '../../graphKoda/dev/frameSheetScene.mjs';
+import {bridge} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {materialDir} from './material-paths.mjs';
 
-const codeRoot=fileURLToPath(new URL('../../coldKode/',import.meta.url));
+const codeRoot=fileURLToPath(new URL('../../graphKoda/',import.meta.url));
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const read=async file=>JSON.parse(await fs.readFile(file,'utf8'));
 const save=(file,value)=>fs.writeFile(file,JSON.stringify(value,null,2),{flag:'wx'});

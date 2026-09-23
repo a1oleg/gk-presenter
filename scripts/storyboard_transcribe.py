@@ -10,7 +10,7 @@ import imageio_ffmpeg
 
 ROOT = Path(__file__).resolve().parents[1]
 source = Path(json.loads((ROOT / 'sources.local.json').read_text(encoding='utf-8'))['videoPath'])
-out = material_dir('output') / 'storyboard-coldKode2'
+out = material_dir('output') / 'storyboard-graphKoda2'
 out.mkdir(exist_ok=True)
 with av.open(str(source)) as media:
     duration = media.duration / 1_000_000
@@ -36,7 +36,7 @@ for index, start in enumerate(range(0, int(duration) + 1, 240)):
                         '-ss', str(start), '-i', str(source), '-t', str(seconds), '-vn', '-ac', '1', '-ar', '16000', str(wav)], check=True)
     began = time.perf_counter()
     segments, _ = model.transcribe(str(wav), language='ru', beam_size=5, word_timestamps=True,
-        initial_prompt='Техническая презентация: Claude Code, coldKode, TypeScript, React, Neo4j, draw.io, VS Code, Codex, onSubmit, helpers, аннотатор, экстрактор, граф кода.')
+        initial_prompt='Техническая презентация: Claude Code, graphKoda, TypeScript, React, Neo4j, draw.io, VS Code, Codex, onSubmit, helpers, аннотатор, экстрактор, граф кода.')
     rows = [{'start': round(start+s.start,3), 'end': round(start+s.end,3), 'text': s.text.strip(),
              'words': [{'start':round(start+w.start,3), 'end':round(start+w.end,3), 'word':w.word, 'probability':w.probability} for w in s.words or []]} for s in segments]
     report_path.write_text(json.dumps({'start':start,'end':start+seconds,'segments':rows},ensure_ascii=False,indent=2),encoding='utf-8')

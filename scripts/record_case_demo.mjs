@@ -2,8 +2,8 @@ import {materialDir} from '../src/material-paths.mjs';
 import fs from 'node:fs/promises';
 import {connectObs} from './obs_control.mjs';
 import {execFileSync} from 'node:child_process';
-const latest=JSON.parse(await fs.readFile('C:/GitHub/coldKode/tmp/fisher-yates/runtime/latest.json','utf8'));
-const token=(await fs.readFile('C:/GitHub/coldKode/tmp/graph-demo-token.local','utf8')).trim();
+const latest=JSON.parse(await fs.readFile('C:/GitHub/graphKoda/tmp/fisher-yates/runtime/latest.json','utf8'));
+const token=(await fs.readFile('C:/GitHub/graphKoda/tmp/graph-demo-token.local','utf8')).trim();
 const out=`${materialDir('output')}/interactive-row014-${Date.now()}`;await fs.mkdir(out);
 let started=performance.now();const events=[];const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function demo(action,index){const input={surface:'runtime',action,index,functionStableId:latest.root,sessionId:latest.sessionId};const response=await fetch('http://127.0.0.1:17843/demo/step',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify(input),signal:AbortSignal.timeout(20000)});const result=await response.json();if(!response.ok)throw new Error(JSON.stringify(result));events.push({time:(performance.now()-started)/1000,input,result});console.log(JSON.stringify({action,index,result}));}

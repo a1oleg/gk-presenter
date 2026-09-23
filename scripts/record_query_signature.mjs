@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {connectObs} from './obs_control.mjs';
-import {frameSheetScene} from '../../coldKode/dev/frameSheetScene.mjs';
+import {frameSheetScene} from '../../graphKoda/dev/frameSheetScene.mjs';
 const out=path.resolve(process.argv[2]);
 const read=async n=>JSON.parse(await fs.readFile(path.join(out,n),'utf8'));
 const alignment=(await read('alignment.json')).alignment,text=alignment.characters.join('');
@@ -44,7 +44,7 @@ const move=async cue=>{
 try{
  assert(!(await obs.request('GetRecordStatus')).outputActive,'OBS already recording');
  const settings=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});
- assert(settings.inputSettings.window.includes('coldKode PRESENTATION'),'Wrong capture window');
+ assert(settings.inputSettings.window.includes('graphKoda PRESENTATION'),'Wrong capture window');
  const {currentProgramSceneName:sceneName}=await obs.request('GetCurrentProgramScene');
  const {sceneItems}=await obs.request('GetSceneItemList',{sceneName});
  assert(sceneItems.filter(i=>i.sceneItemEnabled).length===1);

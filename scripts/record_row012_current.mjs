@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {parseArgs} from 'node:util';
-import {bridge} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {applyPreparedScene,checkPreparedScene,loadPreparedScene} from '../src/scene-staging.mjs';
 import {connectObs} from './obs_control.mjs';
 
@@ -38,12 +38,12 @@ try {
   const initialFrame=await readFrame();
   assert(initialFrame.visible,'Loop is outside the initial viewport');
   await step({surface:'diagram',action:'presentPointer',stableId:run.loop,cellId:'f0-n4',pointerId:'narrator',text:'for'});
-  const {sceneItems}=await obs.request('GetSceneItemList',{sceneName:'coldKode A12'});
-  const capture=sceneItems.find(i=>i.sourceName==='coldKode presentation capture');
+  const {sceneItems}=await obs.request('GetSceneItemList',{sceneName:'graphKoda A12'});
+  const capture=sceneItems.find(i=>i.sourceName==='graphKoda presentation capture');
   if(!capture||capture.sceneItemTransform.sourceWidth<=0)throw Error('Empty capture');
   const video=await obs.request('GetVideoSettings');
   if(video.outputWidth!==plan.canvas.width||video.outputHeight!==plan.canvas.height||video.fpsNumerator/video.fpsDenominator!==plan.canvas.fps)throw Error('OBS format differs from prepared scene');
-  await obs.request('SetSceneItemTransform',{sceneName:'coldKode A12',sceneItemId:capture.sceneItemId,sceneItemTransform:{boundsType:'OBS_BOUNDS_SCALE_INNER',boundsWidth:plan.canvas.width,boundsHeight:plan.canvas.height,boundsAlignment:0,alignment:5,positionX:0,positionY:0}});
+  await obs.request('SetSceneItemTransform',{sceneName:'graphKoda A12',sceneItemId:capture.sceneItemId,sceneItemTransform:{boundsType:'OBS_BOUNDS_SCALE_INNER',boundsWidth:plan.canvas.width,boundsHeight:plan.canvas.height,boundsAlignment:0,alignment:5,positionX:0,positionY:0}});
   await obs.request('SetRecordDirectory',{recordDirectory:out});
   const schedule=[
     [anchor('откроем'),{surface:'diagram',action:'contextMenu',cellId:'f0-n4'}],

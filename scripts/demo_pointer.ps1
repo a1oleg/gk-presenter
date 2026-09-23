@@ -10,7 +10,7 @@ public class DemoPointer {
  public delegate bool EnumProc(IntPtr h,IntPtr p);
  [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc p,IntPtr l);
  [DllImport("user32.dll", CharSet=CharSet.Unicode)] public static extern int GetWindowText(IntPtr h,StringBuilder t,int n);
- public static IntPtr[] FindFisher(){var found=new List<IntPtr>();EnumWindows((h,p)=>{var t=new StringBuilder(1024);GetWindowText(h,t,1024);if(t.ToString().Contains("coldKode (Workspace) - Visual Studio Code"))found.Add(h);return true;},IntPtr.Zero);return found.ToArray();}
+ public static IntPtr[] FindFisher(){var found=new List<IntPtr>();EnumWindows((h,p)=>{var t=new StringBuilder(1024);GetWindowText(h,t,1024);if(t.ToString().Contains("graphKoda (Workspace) - Visual Studio Code"))found.Add(h);return true;},IntPtr.Zero);return found.ToArray();}
  [DllImport("dwmapi.dll")] public static extern int DwmGetWindowAttribute(IntPtr h,int a,out RECT r,int s);
  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
  [DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y);

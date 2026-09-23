@@ -8,7 +8,7 @@ import av, imageio_ffmpeg
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-ROOT = Path('C:/GitHub/coldKode-presenter')
+ROOT = Path('C:/GitHub/graphKoda-presenter')
 SID = '1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
 REPLACEMENTS = {'current': 'ка́рэнт', 'value': 'вэ́лью', 'length': 'лэнгс',
                 'undefined': 'андифа́йнд', 'alphabet': 'а́лфабет', 'index': 'и́ндекс'}

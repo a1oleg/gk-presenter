@@ -10,7 +10,7 @@ const c=prep.cameraBefore.camera;
 const client=new Client({name:'caption-clearance',version:'1'});
 await client.connect(new StdioClientTransport({command:'node',args:['C:/GitHub/drawio-inspector/src/mcp.mjs']}));
 try{
- const result=await client.callTool({name:'inspect_element',arguments:{file:'C:/GitHub/coldKode/graph/draw/generated/Fisher-Yates.drawio',mode:'xml',cellId:'f0-n5'}});
+ const result=await client.callTool({name:'inspect_element',arguments:{file:'C:/GitHub/graphKoda/graph/draw/generated/Fisher-Yates.drawio',mode:'xml',cellId:'f0-n5'}});
  if(result.isError)throw Error(JSON.stringify(result));
  const data=JSON.parse(result.content[0].text),node=data.elements[0];
  if(data.digest!==prep.diagramHash)throw Error('Diagram changed since recording; cannot safely reuse frame');

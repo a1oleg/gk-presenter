@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {connectObs} from '../scripts/obs_control.mjs';
 const out=process.argv[2],idx=await diagramIndex({file:'graph/draw/generated/Fisher-Yates.drawio'});
 const fn=idx.cells.find(c=>c.cellId==='f0-n1').stableId.replace(/:flow-start$/,'');
 const a=JSON.parse(await fs.readFile(path.join(out,'alignment.json'),'utf8')).alignment,text=a.characters.join('');
-const source=await fs.readFile('C:/GitHub/coldKode/examples/fisher-yates/src/shuffle.ts','utf8'),lines=source.split(/\r?\n/);
+const source=await fs.readFile('C:/GitHub/graphKoda/examples/fisher-yates/src/shuffle.ts','utf8'),lines=source.split(/\r?\n/);
 function sourceId(line,token){const col=lines[line-1].indexOf(token);if(col<0)throw Error('Missing source token');return `examples/fisher-yates/src/shuffle.ts:${line}:${col}:${line}:${col+token.length}`;}
 const scenario=await fs.readFile(path.join(out,'scenario.json'),'utf8').then(JSON.parse).catch(()=>null);
 const entries=scenario?scenario.events.map(e=>[e.atWord,e.diagramCell,e.codeLine,e.codeToken]):[['массив','f0-n2-part-1',26,'alphabet'],['объект','f0-n3-part-1',25,'current.index']];
@@ -24,7 +24,7 @@ try{
  const {currentProgramSceneName:sceneName}=await obs.request('GetCurrentProgramScene');
  const scene=await obs.request('GetSceneItemList',{sceneName}),item=scene.sceneItems.find(c=>c.sourceName==='VS Code OBS');
  const setting=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});
- if(!item?.sceneItemEnabled||item.sceneItemTransform.sourceWidth!==1920||item.sceneItemTransform.sourceHeight!==1032||!setting.inputSettings.window.includes('coldKode PRESENTATION'))throw Error('OBS capture target mismatch');
+ if(!item?.sceneItemEnabled||item.sceneItemTransform.sourceWidth!==1920||item.sceneItemTransform.sourceHeight!==1032||!setting.inputSettings.window.includes('graphKoda PRESENTATION'))throw Error('OBS capture target mismatch');
  if(scene.sceneItems.some(x=>x.sceneItemEnabled&&x!==item))throw Error('Unexpected source visible');
  await fs.writeFile(path.join(out,'obs-before.json'),JSON.stringify(scene,null,2));
  await obs.request('StartRecord');active=true;const start=performance.now(),events=[];

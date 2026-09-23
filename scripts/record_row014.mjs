@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import {bridge} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {applyPreparedScene,checkPreparedScene,loadPreparedScene} from '../src/scene-staging.mjs';
 import {connectObs} from './obs_control.mjs';
 
@@ -38,10 +38,10 @@ try {
   assert(schedule[1][0]>schedule[0][0]+0.65,'Segment cues overlap');
   const video=await obs.request('GetVideoSettings');
   assert.equal(video.outputWidth,plan.canvas.width);assert.equal(video.outputHeight,plan.canvas.height);assert.equal(video.fpsNumerator/video.fpsDenominator,plan.canvas.fps);
-  await obs.request('SetCurrentProgramScene',{sceneName:'coldKode A12'});
-  const {sceneItems}=await obs.request('GetSceneItemList',{sceneName:'coldKode A12'});
-  const capture=sceneItems.find(i=>i.sourceName==='coldKode presentation capture');assert(capture?.sceneItemTransform.sourceWidth>0);
-  await obs.request('SetSceneItemTransform',{sceneName:'coldKode A12',sceneItemId:capture.sceneItemId,sceneItemTransform:{boundsType:'OBS_BOUNDS_SCALE_INNER',boundsWidth:1920,boundsHeight:1080,boundsAlignment:0,alignment:5,positionX:0,positionY:0}});
+  await obs.request('SetCurrentProgramScene',{sceneName:'graphKoda A12'});
+  const {sceneItems}=await obs.request('GetSceneItemList',{sceneName:'graphKoda A12'});
+  const capture=sceneItems.find(i=>i.sourceName==='graphKoda presentation capture');assert(capture?.sceneItemTransform.sourceWidth>0);
+  await obs.request('SetSceneItemTransform',{sceneName:'graphKoda A12',sceneItemId:capture.sceneItemId,sceneItemTransform:{boundsType:'OBS_BOUNDS_SCALE_INNER',boundsWidth:1920,boundsHeight:1080,boundsAlignment:0,alignment:5,positionX:0,positionY:0}});
   await obs.request('SetRecordDirectory',{recordDirectory:out});
   await fs.writeFile(path.join(out,'capture-plan.json'),JSON.stringify({row:14,initialCase:0,duration,schedule},null,2));
   await obs.request('StartRecord');owned=true;started=performance.now();

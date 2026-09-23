@@ -15,8 +15,8 @@ try {
  if(enabled.length!==1)throw Error('Expected exactly one enabled window capture; select it in OBS first');
  const inputName=enabled[0].sourceName;
  const {propertyItems}=await obs.request('GetInputPropertiesListPropertyItems',{inputName,propertyName:'window'});
- const windows=propertyItems.filter(i=>i.itemEnabled&&i.itemName.includes('coldKode PRESENTATION'));
- if(windows.length!==1)throw Error('Expected exactly one live coldKode PRESENTATION window');
+ const windows=propertyItems.filter(i=>i.itemEnabled&&i.itemName.includes('graphKoda PRESENTATION'));
+ if(windows.length!==1)throw Error('Expected exactly one live graphKoda PRESENTATION window');
  const original=await obs.request('GetInputSettings',{inputName});
  const out=path.join(materialDir('output'),`obs-presentation-${Date.now()}`);await fs.mkdir(out,{recursive:true});
  await fs.writeFile(path.join(out,'previous-settings.json'),JSON.stringify({sceneName,inputName,...original,sceneItem:enabled[0]},null,2));

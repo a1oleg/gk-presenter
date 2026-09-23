@@ -1,8 +1,8 @@
 // Reframe only the diagram; preserve the user's live code pane and divider.
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {frameSheetScene} from '../../coldKode/dev/frameSheetScene.mjs';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {frameSheetScene} from '../../graphKoda/dev/frameSheetScene.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {materialDir} from '../src/material-paths.mjs';
 import {connectObs} from './obs_control.mjs';
 const row=Number(process.argv[2]),file=process.argv[3];

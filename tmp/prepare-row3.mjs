@@ -1,4 +1,4 @@
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 const fn='services/api/claude.ts:1022:0:2911:1',file='graph/draw/generated/queryModel.drawio';
 console.log(await bridge({surface:'editor',action:'openDiagram',functionStableId:fn,filePath:file}));
 const idx=await diagramIndex({file});

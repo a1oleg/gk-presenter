@@ -2,9 +2,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {Client} from '../../drawio-inspector/node_modules/@modelcontextprotocol/sdk/dist/esm/client/index.js';
 import {StdioClientTransport} from '../../drawio-inspector/node_modules/@modelcontextprotocol/sdk/dist/esm/client/stdio.js';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 const out=path.resolve(process.argv[2]),s=JSON.parse(await fs.readFile(path.join(out,'scenario.json'),'utf8'));
-const file=path.resolve('../coldKode',s.diagram.file),idx=await diagramIndex({file:s.diagram.file});
+const file=path.resolve('../graphKoda',s.diagram.file),idx=await diagramIndex({file:s.diagram.file});
 const client=new Client({name:'dual-scene-layout',version:'1.0'});
 await client.connect(new StdioClientTransport({command:'node',args:['C:/GitHub/drawio-inspector/src/mcp.mjs']}));
 try{

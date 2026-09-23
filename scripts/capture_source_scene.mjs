@@ -2,7 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {connectObs} from './obs_control.mjs';
 const [directory,planFile,...flags]=process.argv.slice(2);
 if(flags.some(f=>f!=='--standalone'))throw Error('Unknown capture option');
@@ -35,7 +35,7 @@ try {
  if(captures.length!==1||captures[0].inputKind!=='window_capture')throw Error('Expected only one window capture');
  const capture=captures[0],inputName=capture.sourceName;
  const settings=await obs.request('GetInputSettings',{inputName});
- if(!settings.inputSettings.window.includes('coldKode PRESENTATION')||settings.inputSettings.priority!==0)throw Error('OBS must use the exact separate presentation window');
+ if(!settings.inputSettings.window.includes('graphKoda PRESENTATION')||settings.inputSettings.priority!==0)throw Error('OBS must use the exact separate presentation window');
  const {propertyItems}=await obs.request('GetInputPropertiesListPropertyItems',{inputName,propertyName:'window'});
  if(!propertyItems.some(x=>x.itemEnabled&&x.itemValue===settings.inputSettings.window))throw Error('Presentation window is not available');
  const video=await obs.request('GetVideoSettings');if(video.baseWidth!==1600||video.baseHeight!==900)throw Error('Expected 1600x900 canvas');

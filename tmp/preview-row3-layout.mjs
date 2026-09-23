@@ -1,4 +1,4 @@
-import {bridge} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {connectObs} from '../scripts/obs_control.mjs';
 const base={functionStableId:'services/api/claude.ts:1022:0:2911:1'};
 console.log(await bridge({...base,surface:'editor',action:'openDiagram',filePath:'graph/draw/generated/queryModel.drawio'}));

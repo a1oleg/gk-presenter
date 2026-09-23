@@ -28,7 +28,7 @@ export async function renderScene({sceneDir,mode='video',time=0,filename,signal,
  let speech;
  if(mode==='video'){speech=path.join(out,'speech.wav');try{await fs.access(speech);}catch{speech=path.join(out,'speech.mp3');await fs.access(speech);}}
  checkAbort(signal);
- const scratch=await fs.mkdtemp(path.join(os.tmpdir(),'coldkode-render-'));
+ const scratch=await fs.mkdtemp(path.join(os.tmpdir(),'graphKoda-render-'));
  const partial=path.join(scratch,name);let browser,encoder,stderr='',sent=0,rendered=0,encoderError;
  const abort=()=>{encoder?.kill();void browser?.close().catch(()=>{});};signal?.addEventListener('abort',abort,{once:true});
  try{

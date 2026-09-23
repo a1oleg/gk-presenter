@@ -3,7 +3,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 import {materialDir} from '../src/material-paths.mjs';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {connectObs} from './obs_control.mjs';
 const snapshot=JSON.parse(execFileSync('C:/GitHub/google-sheets-mcp/.venv/Scripts/python.exe',['tmp/read_row2.py','!A41:P41'],{encoding:'utf8',env:{...process.env,PYTHONIOENCODING:'utf-8'}}));
 const row=snapshot.values[0];assert(!row[0]&&row[10]==='сохранить рамку от пред'&&row[4]==='снизу');
@@ -23,7 +23,7 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms));
 const obs=await connectObs();let owned=false,recording,completed=false,duration,events=[];
 try{
  assert(!(await obs.request('GetRecordStatus')).outputActive);
- const settings=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});assert(settings.inputSettings.window.includes('coldKode PRESENTATION'));
+ const settings=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});assert(settings.inputSettings.window.includes('graphKoda PRESENTATION'));
  const codeStart=`services/api/claude.ts:${row[5]}:0:${row[5]}:1`,codeEnd=`services/api/claude.ts:${row[6]}:0:${row[6]}:1`;
  await call({surface:'editor',action:'openSource',filePath:'graph/draw/generated/queryModel.drawio',stableId:codeStart,endStableId:codeEnd,placement:'BELOW',editorAreaHeight:960});
  await call({...frame,stableId:from.stableId,cellId:from.cellId,topPadding:last.screenBounds.y,durationMs:0});

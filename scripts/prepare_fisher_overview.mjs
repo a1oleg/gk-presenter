@@ -2,10 +2,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {readScene,renderScene} from '../../coldKode/graph/scene/scene.mjs';
+import {readScene,renderScene} from '../../graphKoda/graph/scene/scene.mjs';
 const out=path.resolve(process.argv[2]),count=Number(process.argv[3]);
 if(!Number.isInteger(count)||count<0||count>3)throw Error('Annotation count must be 0..3');
-const source=path.resolve('../coldKode/graph/draw/scenes/fisher.drawio');
+const source=path.resolve('../graphKoda/graph/draw/scenes/fisher.drawio');
 const original=await fs.readFile(source),scene=await readScene('fisher');
 scene.pointers={};scene.annotationStep=count;
 await fs.writeFile(path.join(out,'source.drawio'),renderScene(scene));

@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {connectObs} from '../scripts/obs_control.mjs';
 const out=process.argv[2],fn='services/api/claude.ts:1022:0:2911:1';
 const a=JSON.parse(await fs.readFile(path.join(out,'alignment.json'),'utf8')).alignment,text=a.characters.join('');
@@ -16,7 +16,7 @@ try{
  const before=await obs.request('GetSceneItemList',{sceneName}),item=before.sceneItems.find(x=>x.sourceName==='VS Code OBS');
  if(!item?.sceneItemEnabled||item.sceneItemTransform.sourceWidth<=0||item.sceneItemTransform.sourceHeight<=0)throw Error('OBS window unavailable; refusing black recording');
  const settings=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});
- if(!settings.inputSettings.window.includes('coldKode PRESENTATION')||settings.inputSettings.priority!==0)throw Error('Wrong OBS target');
+ if(!settings.inputSettings.window.includes('graphKoda PRESENTATION')||settings.inputSettings.priority!==0)throw Error('Wrong OBS target');
  if(before.sceneItems.some(x=>x.sceneItemEnabled&&x.sourceName!=='VS Code OBS'))throw Error('Unexpected visible source');
  await fs.writeFile(path.join(out,'obs-before.json'),JSON.stringify({sceneName,...before},null,2));
  await send('presentPointer',cues[0],{durationMs:0});

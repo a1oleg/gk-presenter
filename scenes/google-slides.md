@@ -9,8 +9,8 @@ F голос, G аудио, H видео.
 Для статичного слайда C и D должны быть `нет`. После синтеза с `--audio-column G`:
 
 ```powershell
-C:/GitHub/google-sheets-mcp/.venv/Scripts/python.exe -X utf8 scripts/render_sheet_static.py C:/Users/a1ole/OneDrive/coldKode-presenter/output/SCENE
-C:/GitHub/google-sheets-mcp/.venv/Scripts/python.exe -X utf8 scripts/publish_static_sheet_scene.py C:/Users/a1ole/OneDrive/coldKode-presenter/output/SCENE --row 23
+C:/GitHub/google-sheets-mcp/.venv/Scripts/python.exe -X utf8 scripts/render_sheet_static.py C:/Users/a1ole/OneDrive/graphKoda-presenter/output/SCENE
+C:/GitHub/google-sheets-mcp/.venv/Scripts/python.exe -X utf8 scripts/publish_static_sheet_scene.py C:/Users/a1ole/OneDrive/graphKoda-presenter/output/SCENE --row 23
 ```
 
 Экспорт использует существующие учётные данные Google-коннектора и

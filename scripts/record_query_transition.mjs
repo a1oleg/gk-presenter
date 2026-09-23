@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {connectObs} from './obs_control.mjs';
 const out=path.resolve(process.argv[2]);
 const rowNumber=Number(process.argv[3]||37);
@@ -57,7 +57,7 @@ const obs=await connectObs();let recording,owned=false,completed=false;
 const events=[];const wait=ms=>new Promise(r=>setTimeout(r,Math.max(0,ms)));
 try{
  assert(!(await obs.request('GetRecordStatus')).outputActive);
- const settings=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});assert(settings.inputSettings.window.includes('coldKode PRESENTATION'));
+ const settings=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});assert(settings.inputSettings.window.includes('graphKoda PRESENTATION'));
  const {currentProgramSceneName:sceneName}=await obs.request('GetCurrentProgramScene');
  const {sceneItems}=await obs.request('GetSceneItemList',{sceneName});
  const active=sceneItems.filter(i=>i.sceneItemEnabled);assert(active.length===1);

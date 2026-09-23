@@ -1,8 +1,8 @@
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import fs from 'node:fs/promises';
 const stableId='examples/fisher-yates/src/shuffle.ts:6:7:33:1:flow-start';
 const {glob}=await import('node:fs/promises');const candidates=[];
-for await(const f of glob('C:/GitHub/coldKode/graph/draw/generated/*.drawio')){
+for await(const f of glob('C:/GitHub/graphKoda/graph/draw/generated/*.drawio')){
  const index=await diagramIndex({file:f});if(index.cells.some(c=>c.stableId===stableId))candidates.push(index);
 }
 const index=candidates.find(x=>x.file.endsWith('Fisher-Yates.drawio'));if(!index)throw Error('No function diagram contains the start node');

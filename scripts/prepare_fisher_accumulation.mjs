@@ -2,9 +2,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {readScene,renderScene} from '../../coldKode/graph/scene/scene.mjs';
+import {readScene,renderScene} from '../../graphKoda/graph/scene/scene.mjs';
 const out=path.resolve(process.argv[2]);
-const source=path.resolve('../coldKode/graph/draw/scenes/fisher.drawio');
+const source=path.resolve('../graphKoda/graph/draw/scenes/fisher.drawio');
 const original=await fs.readFile(source),scene=await readScene('fisher');scene.pointers={};scene.annotationStep=3;
 const xml=renderScene(scene);
 for(const count of [1,2,3]){

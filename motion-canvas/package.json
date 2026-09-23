@@ -1,5 +1,5 @@
 {
-  "name": "coldkode-motion-scenes",
+  "name": "graphKoda-motion-scenes",
   "private": true,
   "type": "module",
   "scripts": {"serve": "vite --host 127.0.0.1 --port 9031"},

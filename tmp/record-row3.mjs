@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {connectObs} from '../scripts/obs_control.mjs';
 const out=process.argv[2],fn='services/api/claude.ts:1022:0:2911:1';
 const a=JSON.parse(await fs.readFile(path.join(out,'alignment.json'),'utf8')).alignment;
@@ -24,7 +24,7 @@ try{
  const before=await obs.request('GetSceneItemList',{sceneName});
  const item=before.sceneItems.find(x=>x.sourceName==='VS Code OBS');if(!item)throw Error('Missing OBS input');
  const settings=await obs.request('GetInputSettings',{inputName:'VS Code OBS'});
- if(!settings.inputSettings.window.includes('coldKode PRESENTATION')||settings.inputSettings.priority!==0)throw Error('Unsafe OBS target');
+ if(!settings.inputSettings.window.includes('graphKoda PRESENTATION')||settings.inputSettings.priority!==0)throw Error('Unsafe OBS target');
  await fs.writeFile(path.join(out,'obs-before.json'),JSON.stringify({sceneName,...before,settings},null,2));
  for(const s of before.sceneItems)await obs.request('SetSceneItemEnabled',{sceneName,sceneItemId:s.sceneItemId,sceneItemEnabled:s.sceneItemId===item.sceneItemId});
  const {sourceWidth:w,sourceHeight:h}=item.sceneItemTransform,s=Math.min(1600/w,900/h);

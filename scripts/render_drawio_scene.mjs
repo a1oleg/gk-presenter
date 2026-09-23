@@ -45,7 +45,7 @@ for(const url of new Set([...xml.matchAll(/image=(https?:[^;]+);/g)].map(m=>m[1]
 await fs.writeFile(path.join(out,'assets.json'),JSON.stringify(assets,null,2));
 // Built-in draw.io clipart is relative to the webapp, not to about:blank.
 for(const relative of new Set([...xml.matchAll(/image=(img\/[^;"]+)(?=;|")/g)].map(m=>m[1]))) {
- const webapp=path.resolve(root,'../coldKode/graph/vendor/drawio/src/main/webapp');
+ const webapp=path.resolve(root,'../graphKoda/graph/vendor/drawio/src/main/webapp');
  const local=path.resolve(webapp,relative);
  if(!local.startsWith(webapp+path.sep))throw Error('Asset outside draw.io webapp');
  const bytes=await fs.readFile(local);

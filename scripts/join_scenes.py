@@ -37,7 +37,7 @@ for i,p in enumerate(args.videos):
               f'[{i}:a:0]aresample=44100,aformat=channel_layouts=stereo,apad,atrim=duration={duration:.9f},asetpts=PTS-STARTPTS[a{i}]']
     streams += [f'[v{i}][a{i}]']
 filters += [''.join(streams)+f'concat=n={len(records)}:v=1:a=1[v][a]']
-target=out/(f'coldKode-ready-{rows[0][0]:02d}-{rows[-1][0]:02d}.mp4' if rows else 'scenes-joined.mp4')
+target=out/(f'graphKoda-ready-{rows[0][0]:02d}-{rows[-1][0]:02d}.mp4' if rows else 'scenes-joined.mp4')
 print(f'Encoding {cursor:.2f}s',flush=True)
 subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(),'-nostdin','-n','-hide_banner','-loglevel','error',*inputs,
     '-filter_complex_threads','1','-filter_complex',';'.join(filters),'-map','[v]','-map','[a]','-c:v','libx264','-threads','4','-preset','fast','-crf','18',

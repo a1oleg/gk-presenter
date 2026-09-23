@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';import path from 'node:path';
-import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
 import {loadDiagram} from '../../drawio-inspector/src/inspector.mjs';
 import {captionLayout} from '../src/caption-layout.mjs';
 const out=path.resolve(process.argv[2]),file=path.join(out,'scenario.json'),s=JSON.parse(await fs.readFile(file,'utf8'));
-const d=await loadDiagram('C:/GitHub/coldKode/'+s.diagram.file),idx=await diagramIndex({file:s.diagram.file});
+const d=await loadDiagram('C:/GitHub/graphKoda/'+s.diagram.file),idx=await diagramIndex({file:s.diagram.file});
 const top=d.cells.find(c=>c.kind==='vertex'&&c.stableId===s.diagram.top),fn=idx.cells.find(c=>c.cellId==='f0-n1').stableId.replace(/:flow-start$/,'');
 if(!top)throw Error('Upper endpoint missing');
 const {camera}=await bridge({surface:'diagram',action:'presentRead',functionStableId:fn,stableId:top.stableId,cellId:top.id});

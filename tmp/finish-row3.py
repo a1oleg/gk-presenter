@@ -2,7 +2,7 @@ import argparse,asyncio,json,subprocess
 from pathlib import Path
 from mcp import ClientSession,StdioServerParameters
 from mcp.client.stdio import stdio_client
-p=argparse.ArgumentParser();p.add_argument('out',type=Path);args=p.parse_args();out=args.out.resolve();root=Path('C:/GitHub/coldKode-presenter')
+p=argparse.ArgumentParser();p.add_argument('out',type=Path);args=p.parse_args();out=args.out.resolve();root=Path('C:/GitHub/graphKoda-presenter')
 async def main():
  snapshot=json.loads((out/'sheet-source.json').read_text(encoding='utf8'))
  request=json.loads((out/'request.json').read_text(encoding='utf8'))
