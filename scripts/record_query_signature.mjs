@@ -7,6 +7,7 @@ import {frameSheetScene} from '../../coldKode/dev/frameSheetScene.mjs';
 const out=path.resolve(process.argv[2]);
 const read=async n=>JSON.parse(await fs.readFile(path.join(out,n),'utf8'));
 const alignment=(await read('alignment.json')).alignment,text=alignment.characters.join('');
+const pacing=await read('narration-pacing.json').catch(e=>{if(e.code==='ENOENT')return null;throw e;});
 const snapshot=await read('sheet-source.json'),row=snapshot.values[0];
 assert(row[3]==='2'&&['справа','снизу'].includes(row[4])&&row[15]==='3.3');
 const placement=row[4]==='снизу'?'BELOW':'RIGHT';
@@ -29,7 +30,7 @@ const cues=[
 ].map(([phrase,cellId,range])=>{const offset=text.indexOf(phrase);assert(offset>=0,phrase);return{phrase,time:alignment.character_start_times_seconds[offset],cellId,stableId:idx.cells.find(c=>c.cellId===cellId)?.stableId,sourceStableId:sourcePrefix+range};});
 const duration=alignment.character_end_times_seconds.at(-1)+.8;
 const base={functionStableId:owner},events=[],obs=await connectObs();let owned=false,recording,completed=false;
-let initialCamera,opened,codeRangeFits=false;
+let initialCamera,opened,codeRangeFits=false,horizontalAnchor;
 const call=x=>bridge({...base,...x});
 const pause=ms=>new Promise(r=>setTimeout(r,Math.max(0,ms)));
 const move=async cue=>{
@@ -37,6 +38,7 @@ const move=async cue=>{
  const code=await call({surface:'editor',action:'sourcePointer',stableId:cue.sourceStableId});
  const frame=await call({surface:'diagram',action:'presentRead',cellId:cue.cellId,stableId:cue.stableId});
  assert(frame.visible,'Offscreen pointer target '+cue.cellId);
+ assert(Math.abs(frame.camera.scrollLeft-initialCamera.camera.scrollLeft)<1,'Uncommanded horizontal scroll');
  return{diagram,code,frame};
 };
 try{
@@ -56,6 +58,10 @@ try{
  await fs.copyFile(idx.file,path.join(out,'source.drawio'));
  // Establish both panes and the initial framing BEFORE OBS starts recording.
  const framing=await frameSheetScene({row:36,file:idx.file,functionStableId:owner,apply:false});
+ // Retain the SAME left framing anchor throughout all vertical chunks.
+ // Focusing a new step without it also pans horizontally to that step.
+ const left=framing.leftmost||framing.upper;
+ horizontalAnchor={leftStableId:left.stableId,leftCellId:left.cellId};
  assert(Array.from({length:12},(_,i)=>(framing.source.values[0][i]||'')===(row[i]||'')).every(Boolean),'Sheet framing changed since narration');
  const start=cleanId(row[5])||owner,end=cleanId(row[6]);
  // A numeric end line accompanies the user's already prepared manual pane.
@@ -69,6 +75,10 @@ try{
  codeRangeFits=opened.visibleRanges.some(r=>r.startLine<=firstLine&&r.endLine>=lastLine);
  await call({...framing.command,durationMs:0});
  await pause(700);
+ // Resolve page translation after scale-to-fit, then establish the fixed anchor
+ // at that final scale before capture (avoids a rounding/page-origin correction).
+ const fitted=await call({surface:'diagram',action:'presentRead',stableId:framing.upper.stableId,cellId:framing.upper.cellId});
+ await call({surface:'diagram',action:'presentFocus',...horizontalAnchor,stableId:framing.upper.stableId,cellId:framing.upper.cellId,scale:fitted.camera.scale,topPadding:16,durationMs:0});
  initialCamera=await call({surface:'diagram',action:'presentRead',stableId:framing.upper.stableId,cellId:framing.upper.cellId});
  assert(initialCamera.visible&&Math.abs(initialCamera.screenBounds.y-16)<3,'Initial head is not at the top');
  await fs.writeFile(path.join(out,'initial-scene.json'),JSON.stringify({framing,initialCamera,opened,codeRangeFits,captureScale:1},null,2));
@@ -76,12 +86,14 @@ try{
  await obs.request('SetRecordDirectory',{recordDirectory:out});
  await obs.request('StartRecord');owned=true;const started=performance.now();
  for(const cue of cues){
-  await pause(cue.time*1000-(performance.now()-started));
+  // Start travel during the inserted silence, so the pointer arrives BEFORE speech.
+  const lead=pacing?(cue.cellId==='f0-n5'||cue.cellId==='f0-n1-return-signature-method'?1.35:.5):0;
+  await pause(Math.max(0,cue.time-lead)*1000-(performance.now()-started));
   // Keep a chunk still throughout narration. Advance only when the NEXT
   // narrated step lies outside it, after finishing the previous visible step.
   const beforeCue=await call({surface:'diagram',action:'presentRead',cellId:cue.cellId,stableId:cue.stableId});
   if(/^f0-n[2-7]$/.test(cue.cellId)&&!beforeCue.visible){
-   const camera=await call({surface:'diagram',action:'presentFocus',stableId:cue.stableId,cellId:cue.cellId,scale:initialCamera.camera.scale,topPadding:16,durationMs:650});
+   const camera=await call({surface:'diagram',action:'presentFocus',...horizontalAnchor,stableId:cue.stableId,cellId:cue.cellId,scale:initialCamera.camera.scale,topPadding:16,durationMs:650});
    const code=codeRangeFits?{stage:'source-scroll-skipped',reason:'Requested code range is already fully visible'}:await call({surface:'editor',action:'openSource',filePath:file,stableId:cue.sourceStableId,placement});
    events.push({type:'chunk-scroll',time:(performance.now()-started)/1000,firstCell:cue.cellId,before:beforeCue,camera,code});
   }
@@ -92,13 +104,14 @@ try{
    const last=await call({surface:'diagram',action:'presentRead',cellId:lastId,stableId:idx.cells.find(c=>c.cellId===lastId).stableId});
    const b=before.screenBounds,overflow=Math.max(0,last.screenBounds.y+last.screenBounds.height-(before.viewport.height-20));
    let camera=null;
-   if(overflow>0)camera=await call({surface:'diagram',action:'presentFocus',cellId,stableId,scale:initialCamera.camera.scale,topPadding:Math.max(16,b.y-overflow),durationMs:650});
+   if(overflow>0)camera=await call({surface:'diagram',action:'presentFocus',...horizontalAnchor,cellId,stableId,scale:initialCamera.camera.scale,topPadding:Math.max(16,b.y-overflow),durationMs:650});
    const after=await call({surface:'diagram',action:'presentRead',cellId,stableId});
    const lastAfter=await call({surface:'diagram',action:'presentRead',cellId:lastId,stableId:idx.cells.find(c=>c.cellId===lastId).stableId});
    assert(after.visible&&lastAfter.visible,'Generator and its children must fit together');
    events.push({type:'generator-reveal',time:(performance.now()-started)/1000,before,after,camera,minimalScroll:overflow});
   }
-  events.push({...cue,actualTime:(performance.now()-started)/1000,result:await move(cue)});console.log(cue.phrase);
+  const actualTime=(performance.now()-started)/1000,result=await move(cue),readyTime=(performance.now()-started)/1000;
+  events.push({...cue,actualTime,readyTime,result});console.log(cue.phrase);
  }
  await pause(duration*1000-(performance.now()-started));completed=true;
 }finally{

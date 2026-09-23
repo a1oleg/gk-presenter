@@ -15,4 +15,7 @@
   pointer placement. Do not classify JSON by its extension alone. Schemas,
   configuration templates and test fixtures remain in Git.
 - Publish canonical OneDrive paths, not compatibility paths, in Google Sheets.
+- After initial scene framing, keep horizontal camera position fixed unless
+   the user explicitly requests a horizontal move. Vertical chunk transitions
+   must reuse the initial horizontal framing anchor and verify animation samples.
   Detect the video-link column from the current header; do not assume L or M.
