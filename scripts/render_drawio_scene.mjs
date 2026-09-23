@@ -14,6 +14,8 @@ const {StdioClientTransport}=await import(pathToFileURL(require.resolve('@modelc
 const {resolveViewer}=await import(pathToFileURL(path.join(inspector,'src/render.mjs')));
 const out=path.resolve(process.argv[2]);
 const [canvasWidth,canvasHeight]=(process.env.PRESENTER_CANVAS||'1600x900').split('x').map(Number);
+const fixedScale=process.env.PRESENTER_SCALE?Number(process.env.PRESENTER_SCALE):null;
+if(fixedScale!==null&&(!Number.isFinite(fixedScale)||fixedScale<=0))throw Error('Invalid fixed scale');
 if(!Number.isInteger(canvasWidth)||!Number.isInteger(canvasHeight)||canvasWidth<100||canvasHeight<100)throw Error('Invalid canvas');
 const file=path.join(out,'source.drawio');
 const client=new Client({name:'presenter-scene',version:'1.0.0'});
@@ -58,7 +60,7 @@ try{
  const page=await ctx.newPage();
  await page.setContent(`<html><body style="margin:0;overflow:hidden;background:white"><div id="graph" style="width:${canvasWidth}px;height:${canvasHeight}px"></div></body></html>`);
  await page.addScriptTag({path:await resolveViewer()});
- const geometry=await page.evaluate(async ({xml,focusCellId,canvasWidth,canvasHeight})=>{
+ const geometry=await page.evaluate(async ({xml,focusCellId,canvasWidth,canvasHeight,fixedScale})=>{
   const graph=new Graph(document.getElementById('graph'));graph.setEnabled(false);
   const doc=mxUtils.parseXml(xml);
   new mxCodec(doc).decode(doc.getElementsByTagName('mxGraphModel')[0],graph.getModel());
@@ -66,8 +68,8 @@ try{
   // Fit visible content, not unused editor page margins; preserve all relative positions.
   const b=focusCellId?graph.getView().getState(graph.getModel().getCell(focusCellId)):graph.getGraphBounds();
   if(!b)throw Error('Focus cell missing: '+focusCellId);
-  const scale=Math.min(canvasWidth*.9/b.width,canvasHeight*(700/900)/b.height);
-  const tx=(canvasWidth/scale-b.width)/2-b.x,ty=(canvasHeight/scale-b.height)/2-b.y;
+  const scale=fixedScale??Math.min(canvasWidth*.9/b.width,canvasHeight*(700/900)/b.height);
+  const tx=(canvasWidth/scale-b.width)/2-b.x,ty=fixedScale!==null?32/scale-b.y:(canvasHeight/scale-b.height)/2-b.y;
   graph.getView().scaleAndTranslate(scale,tx,ty);graph.getView().validate();
   await document.fonts.ready;
   await Promise.all([...document.querySelectorAll('image')].map(e=>new Promise((res,rej)=>{
@@ -81,7 +83,7 @@ try{
    cells[cell.id]={x:s.x,y:s.y,width:s.width,height:s.height,edge:!!cell.edge,points:s.absolutePoints?.filter(Boolean).map(p=>({x:p.x,y:p.y}))};
   }
   return{width:canvasWidth,height:canvasHeight,scale,translation:{x:tx,y:ty},cells};
- },{xml,focusCellId:process.argv[4]||null,canvasWidth,canvasHeight});
+ },{xml,focusCellId:process.argv[4]||null,canvasWidth,canvasHeight,fixedScale});
  await fs.writeFile(path.join(out,'screen-geometry.json'),JSON.stringify(geometry,null,2));
  await page.screenshot({path:path.join(out,'scene.png')});
  console.log('Scene exported, objects:',Object.keys(geometry.cells).length);
