@@ -11,7 +11,7 @@ assert(row[15]==='3.3'&&['','2'].includes(row[3]||'')&&['','снизу'].include
 const clean=v=>String(v||'').replace(/^stableId:\s*/,'').trim();
 const idx=await diagramIndex({file:'graph/draw/generated/queryModel.drawio'});
 const head=id=>{const a=idx.cells.filter(c=>c.stableId===id);const b=a.filter(c=>!a.some(p=>p.cellId===c.parent));assert(b.length===1,id);return b[0];};
-const upper=head(clean(row[7])),target=clean(row[12])==='нет'?null:head(clean(row[12]));
+const upper=head(clean(row[7])),target=['','нет'].includes(clean(row[12]))?null:head(clean(row[12]));
 const lower=clean(row[10])?head(clean(row[10])):null;
 const rawScale=String(row[11]||'').trim();
 const explicitScale=rawScale?Number(rawScale.replace('%','').replace(',','.'))/(rawScale.endsWith('%')?100:1):null;
@@ -35,6 +35,14 @@ const markers=rowNumber===39?[
  ['залогировать','f0-n23','1062:4:1062:42'],
  ['сформировать стандартное','f0-n30-part-2','1063:10:1066:5'],
  ['выбрать другую модель','f0-n39-part-3','1064:6:1064:42'],
+]:rowNumber===42?[
+ ['Сначала проверяем','f0-n8','1033:6:1033:26'],
+ ['нескольких функций','f1-n1','1033:6:1033:26'],
+ ['фиксируем попытку','f0-n10','1034:4:1034:62'],
+ ['откуда пришёл','f0-n14-part-2','1034:27:1034:46'],
+ ['какая модель','f0-n15-part-2','1034:48:1034:61'],
+ ['своё локальное','f0-n10','1034:4:1034:62'],
+ ['в массив','f0-n10','1034:4:1034:62'],
 ]:[];
 const timedMarkers=markers.map(([phrase,cellId,range])=>{const pos=text.indexOf(phrase);assert(pos>=0,phrase);const c=idx.cells.find(c=>c.cellId===cellId);assert(c?.stableId,cellId);return{phrase,cellId,stableId:c.stableId,sourceStableId:'services/api/claude.ts:'+range,time:a.character_start_times_seconds[pos]};});
 const obs=await connectObs();let recording,owned=false,completed=false;
