@@ -4,11 +4,10 @@ from pathlib import Path
 import imageio_ffmpeg
 
 out=Path(sys.argv[1]).resolve()
+assert not (out/'narration-pacing.json').exists(),'Prepare a fresh retake; do not apply pauses twice'
 data=json.loads((out/'alignment.json').read_text(encoding='utf8'))
 a=data['alignment']; text=''.join(a['characters'])
-plan=[('Она принимает',.6),('системный промпт',.65),('настройки размышления',.65),
-      ('доступные инструменты',1.6),('сигнал отмены',.65),('и объект дополнительных',.65),
-      ('Среди них',.5),('После параметров',1.6)]
+plan=[('доступные инструменты',.95),('После параметров',1.0)]
 rate=48000
 pcm=subprocess.check_output([imageio_ffmpeg.get_ffmpeg_exe(),'-v','error','-i',str(out/'speech.mp3'),'-f','s16le','-ac','1','-ar',str(rate),'-'])
 pauses=[]

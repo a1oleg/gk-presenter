@@ -7,6 +7,11 @@ record=json.loads((out/'recording.json').read_text(encoding='utf8'))
 assert record['completed']
 duration=math.ceil(record['duration']*30)/30
 audio=out/'speech-paced.wav' if (out/'speech-paced.wav').exists() else out/'speech.mp3'
+timing=[]
+if (out/'narration-pacing.json').exists():
+ timing=[{'phrase':e['phrase'],'readyBeforeSpeechSeconds':e['time']-e['readyTime']} for e in record['events'] if 'result' in e]
+ assert all(e['readyBeforeSpeechSeconds']>=0 for e in timing),'Pointer arrived after narration started'
+ (out/'pacing-validation.json').write_text(json.dumps(timing,ensure_ascii=False,indent=2),encoding='utf8')
 subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(),'-nostdin','-y','-hide_banner','-loglevel','error',
  '-i',record['recording']['outputPath'],'-i',str(audio),'-map','0:v:0','-map','1:a:0',
  '-vf','fps=30,tpad=stop_mode=clone:stop_duration=0.5','-c:v','libx264','-preset','fast','-crf','18','-pix_fmt','yuv420p',

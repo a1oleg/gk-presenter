@@ -86,8 +86,9 @@ try{
  await obs.request('SetRecordDirectory',{recordDirectory:out});
  await obs.request('StartRecord');owned=true;const started=performance.now();
  for(const cue of cues){
+  if(pacing&&cue===cues[0])continue; // Already positioned before capture.
   // Start travel during the inserted silence, so the pointer arrives BEFORE speech.
-  const lead=pacing?(cue.cellId==='f0-n5'||cue.cellId==='f0-n1-return-signature-method'?1.35:.5):0;
+  const lead=pacing?(cue.cellId==='f0-n5'?2.8:cue.cellId==='f0-n1-return-signature-method'?4.6:1.9):0;
   await pause(Math.max(0,cue.time-lead)*1000-(performance.now()-started));
   // Keep a chunk still throughout narration. Advance only when the NEXT
   // narrated step lies outside it, after finishing the previous visible step.
