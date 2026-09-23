@@ -9,19 +9,36 @@ import {resolveViewer} from '../../drawio-inspector/src/render.mjs';
 const out=process.argv[2];
 const snapshot=JSON.parse(await fs.readFile(path.join(out,'sheet-source.json'),'utf8'));
 const is18=snapshot.range.includes('A18:');
+const is19=snapshot.range.includes('A19:');
+const is20=snapshot.range.includes('A20:');
 const source=snapshot.values[0][2]||(is18?'C:/GitHub/coldKode/graph/draw/FY-sequence.drawio':null);
 const xml=await fs.readFile(source,'utf8');
 // A scene-local annotation, not a persisted semantic annotation in the source graph.
 const annotation='<mxCell id="presenter-wait" value="ожидание" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#b3b3b3;fontColor=#000000;fontSize=14;arcSize=15;" vertex="1" parent="1"><mxGeometry x="355" y="618" width="160" height="40" as="geometry"/></mxCell>';
 let extra='';
-if(is18){
+if(is18||is19||is20){
  const old='C:/Users/a1ole/OneDrive/coldKode-presenter/output/scene-row019-1789539624179143600/annotated/source.drawio';
  const oldXml=await fs.readFile(old,'utf8');
  const label=oldXml.match(/id="snippet-random" label="([^"]+)"/)[1];
  extra=`<mxCell id="presenter-random" value="${label}" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f5f5f5;strokeColor=#b3b3b3;fontColor=#000000;fontSize=14;spacing=10;align=left;" vertex="1" parent="1"><mxGeometry x="785" y="752" width="430" height="110" as="geometry"/></mxCell>`;
  await fs.writeFile(path.join(out,'annotation-source.json'),JSON.stringify({file:old,cellId:'snippet-random',text:label},null,2));
 }
-const staged=xml.replace('</root>',annotation+extra+'</root>');
+let swap='';
+if(is19||is20){
+ const old='C:/Users/a1ole/OneDrive/coldKode-presenter/output/scene-row022-1789542834324742500/stage2/source.drawio';
+ const label=(await fs.readFile(old,'utf8')).match(/id="snippet-swap" label="([^"]+)"/)[1];
+ swap=`<mxCell id="presenter-swap" value="${label}" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f5f5f5;strokeColor=#b3b3b3;fontColor=#000000;fontSize=14;spacing=10;align=left;" vertex="1" parent="1"><mxGeometry x="935" y="1103" width="370" height="120" as="geometry"/></mxCell>`;
+ await fs.writeFile(path.join(out,'swap-annotation-source.json'),JSON.stringify({file:old,cellId:'snippet-swap',text:label},null,2));
+}
+let shuffle=annotation;
+if(is20){
+ const old='C:/Users/a1ole/OneDrive/coldKode-presenter/output/scene-row022-1789542834324742500/stage2/source.drawio';
+ const label=(await fs.readFile(old,'utf8')).match(/id="snippet-shuffle" label="([^"]+)"/)[1];
+ shuffle=`<mxCell id="presenter-shuffle" value="${label}" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f5f5f5;strokeColor=#b3b3b3;fontColor=#000000;fontSize=14;spacing=10;align=left;" vertex="1" parent="1"><mxGeometry x="355" y="608" width="520" height="110" as="geometry"/></mxCell>`;
+ await fs.writeFile(path.join(out,'shuffle-annotation-source.json'),JSON.stringify({file:old,cellId:'snippet-shuffle',text:label},null,2));
+}
+const steps=is20?[['1',735],['2',825]].map(([n,y])=>`<mxCell id="presenter-step-${n}" value="Шаг ${n}" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f5f5f5;strokeColor=#b3b3b3;fontColor=#000000;fontSize=14;spacing=10;" vertex="1" parent="1"><mxGeometry x="330" y="${y}" width="170" height="44" as="geometry"/></mxCell>`).join(''):'';
+const staged=xml.replace('</root>',shuffle+extra+swap+steps+'</root>');
 const stagedFile=path.join(out,'waiting.drawio');
 await fs.writeFile(stagedFile,staged);await fs.writeFile(path.join(out,'source.drawio'),xml);
 const client=new Client({name:'sequence-wait-check',version:'1'});
@@ -39,7 +56,8 @@ const browser=await chromium.launch({channel:'chrome',headless:true});
 try{
  const page=await browser.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:1});
  await page.route('**/*',r=>r.abort());
- const frames=[['before',is18?xml.replace('</root>',annotation+'</root>'):xml],['waiting',staged]];
+ const frames=[['before',(is18||is19||is20)?xml.replace('</root>',annotation+((is19||is20)?extra:'')+(is20?swap:'')+'</root>'):xml],['waiting',staged]];
+ if(is20)frames.push(['steps',xml.replace('</root>',annotation+extra+swap+steps+'</root>')]);
  if(is18){const flow=await fs.readFile('C:/GitHub/coldKode/graph/draw/generated/Fisher-Yates.drawio','utf8');frames.push(['flow',flow]);await fs.writeFile(path.join(out,'flow.drawio'),flow);}
  for(const [name,content] of frames){
   await page.setContent('<body style="margin:0;background:white"><div id="g" style="width:1920px;height:1080px;overflow:hidden"></div></body>');
@@ -58,7 +76,7 @@ try{
   await page.screenshot({path:path.join(out,name+'.png')});
  }
 }finally{await browser.close();}
-if(is18){
+if(is18||is19||is20){
  execFileSync('C:/GitHub/coldKode-presenter/.venv/Scripts/python.exe',['C:/GitHub/coldKode-presenter/scripts/assemble_sequence_annotation.py',out],{stdio:'inherit',windowsHide:true});
  process.exit(0);
 }

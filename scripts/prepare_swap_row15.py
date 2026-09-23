@@ -15,6 +15,8 @@ async def main():
    assert not reply.isError
    snapshot=json.loads(reply.content[0].text)
  text=snapshot['values'][0][0].strip()
+ if row==19:text=text.replace('проверяет своём в кэше','проверяет в своём кэше').replace('а так же','а также')
+ if row==20:text=text.replace('а так же','а также')
  assert snapshot['values'][0][14]=='3.3', 'This script is configured for voice 3.3 only'
  voice=json.loads((material_dir()/'scene-row011-captions-1790056098495880100'/'request.json').read_text(encoding='utf8'))['voice_id']
  payload={'text':text,'model_id':'eleven_v3','voice_settings':{'stability':.5,'similarity_boost':1.0}}
