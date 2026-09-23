@@ -9,7 +9,11 @@ a=json.loads((out/'alignment.json').read_text(encoding='utf8'));a=a.get('normali
 text=''.join(a['characters']).lower()
 geo=json.loads((out/'screen-geometry.json').read_text())['cells']
 def cue(s):return a['character_start_times_seconds'][text.index(s)]
-route=([(0,'annotator'),(cue('структуру'),'199'),(cue('исходный код'),'source'),(cue('логи'),'logs'),(cue('агенту'),'agent'),(cue('сохраняет'),'199'),(cue('диаграмму'),'ui')] if 'annotator' in geo else
+route=([(0,'c10'),(cue('заглушку'),'stub-check'),(cue('логикой агента'),'c8'),
+        (cue('в самом начале'),'c10'),(cue('клиента'),'c14'),
+        (cue('если заглушка'),'stub-check'),(cue('записываем'),'stub-record'),
+        (cue('возвращаем'),'stub-yield')] if 'stub-check' in geo else
+ [(0,'annotator'),(cue('структуру'),'199'),(cue('исходный код'),'source'),(cue('логи'),'logs'),(cue('агенту'),'agent'),(cue('сохраняет'),'199'),(cue('диаграмму'),'ui')] if 'annotator' in geo else
  [(0,'c8'),(cue('аннотации'),'annotation-c8'),(cue('функция querymodelwithstreaming'),'c8'),
   (cue('передаёт'),'c27'),(cue('внутри querymodel'),'c10'),
   (cue('подробнее'),'annotation-c10'),(cue('клиент anthropic'),'c14'),

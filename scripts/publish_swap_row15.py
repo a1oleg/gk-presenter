@@ -15,7 +15,7 @@ async def main():
    await c.initialize()
    async def read(n):
     result=await c.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':sid,'notation':n});assert not result.isError;return json.loads(result.content[0].text)
-   current=(await read(f'!A{row}:O{row}'))['values'];expected=snap['values']
+   current=(await read(snap['range']))['values'];expected=snap['values']
    spoken=json.loads((out/'request.json').read_text(encoding='utf8'))['text']
    assert current==expected or (current[0][1:]==expected[0][1:] and current[0][0].strip()==spoken),'Sheet changed; no publication'
    header=(await read('!A1:Z1'))['values'][0];col=header.index('ссылка на видео');assert col<26

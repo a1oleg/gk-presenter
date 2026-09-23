@@ -11,13 +11,16 @@ async def main():
  async with stdio_client(StdioServerParameters(command='C:/GitHub/google-sheets-mcp/.venv/Scripts/python.exe',args=['C:/GitHub/google-sheets-mcp/server.py'])) as (r,w):
   async with ClientSession(r,w) as c:
    await c.initialize()
-   reply=await c.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':SID,'notation':f'!A{row}:O{row}'})
+   header_reply=await c.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':SID,'notation':'!A1:Z1'})
+   headers=json.loads(header_reply.content[0].text)['values'][0]
+   voice_col=headers.index('голос')
+   reply=await c.call_tool('get_sheet_data_by_notation',{'spreadsheet_id':SID,'notation':f'!A{row}:{chr(65+voice_col)}{row}'})
    assert not reply.isError
    snapshot=json.loads(reply.content[0].text)
  text=snapshot['values'][0][0].strip()
  if row==19:text=text.replace('проверяет своём в кэше','проверяет в своём кэше').replace('а так же','а также')
  if row==20:text=text.replace('а так же','а также')
- assert snapshot['values'][0][14]=='3.3', 'This script is configured for voice 3.3 only'
+ assert snapshot['values'][0][voice_col]=='3.3', 'This script is configured for voice 3.3 only'
  voice=json.loads((material_dir()/'scene-row011-captions-1790056098495880100'/'request.json').read_text(encoding='utf8'))['voice_id']
  payload={'text':text,'model_id':'eleven_v3','voice_settings':{'stability':.5,'similarity_boost':1.0}}
  for name,value in [('sheet-source.json',snapshot),('request.json',{'voice_id':voice,**payload})]:
