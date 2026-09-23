@@ -7,6 +7,7 @@ const out=path.resolve(process.argv[2]);
 const rowNumber=Number(process.argv[3]||37);
 const read=async n=>JSON.parse(await fs.readFile(path.join(out,n),'utf8'));
 const row=(await read('sheet-source.json')).values[0];
+const diagramOnly=rowNumber===42&&!row[4];
 assert(row[15]==='3.3'&&['','2'].includes(row[3]||'')&&['','снизу'].includes(row[4]));
 const clean=v=>String(v||'').replace(/^stableId:\s*/,'').trim();
 const idx=await diagramIndex({file:'graph/draw/generated/queryModel.drawio'});
@@ -36,13 +37,20 @@ const markers=rowNumber===39?[
  ['сформировать стандартное','f0-n30-part-2','1063:10:1066:5'],
  ['выбрать другую модель','f0-n39-part-3','1064:6:1064:42'],
 ]:rowNumber===42?[
- ['Сначала проверяем','f0-n8','1033:6:1033:26'],
+ ['Сначала проверка','f0-n8','1033:6:1033:26'],
+ ['вызов внутри вызова','f1-n3-part-1','1033:6:1033:26'],
  ['нескольких функций','f1-n1','1033:6:1033:26'],
  ['фиксируем попытку','f0-n10','1034:4:1034:62'],
  ['откуда пришёл','f0-n14-part-2','1034:27:1034:46'],
  ['какая модель','f0-n15-part-2','1034:48:1034:61'],
- ['своё локальное','f0-n10','1034:4:1034:62'],
- ['в массив','f0-n10','1034:4:1034:62'],
+ ['своё локальное','f2-n1','1034:4:1034:62'],
+ ['в массив','f2-n2-part-2','1034:4:1034:62'],
+ ['создаётся стоковое','f0-n20','1035:20:1040:6'],
+ ['из нашей настройки','f0-n35-part-3','1037:8:1038:49'],
+ ['стандартной фразы','f0-n35-part-5','1037:8:1038:49'],
+ ['Причина остановки','f0-n19-part-5','1041:4:1041:44'],
+ ['Через yield','f0-n34-part-1','1043:4:1043:17'],
+ ['Следующий return','f0-n41','1044:4:1044:10'],
 ]:[];
 const timedMarkers=markers.map(([phrase,cellId,range])=>{const pos=text.indexOf(phrase);assert(pos>=0,phrase);const c=idx.cells.find(c=>c.cellId===cellId);assert(c?.stableId,cellId);return{phrase,cellId,stableId:c.stableId,sourceStableId:'services/api/claude.ts:'+range,time:a.character_start_times_seconds[pos]};});
 const obs=await connectObs();let recording,owned=false,completed=false;
@@ -58,13 +66,15 @@ try{
  const horizontal={leftStableId:left.stableId,leftCellId:left.cellId};
  const sourceStart=rowNumber===37?owner:`services/api/claude.ts:${Number(row[5])}:0:${Number(row[5])}:1`;
  const sourceEnd=row[6]?`services/api/claude.ts:${Number(row[6])}:0:${Number(row[6])}:1`:undefined;
- const source=await call({surface:'editor',action:'openSource',filePath:'graph/draw/generated/queryModel.drawio',stableId:sourceStart,endStableId:sourceEnd,editorAreaHeight:960,placement:'BELOW'});
+ const source=diagramOnly?await call({surface:'editor',action:'openDiagram',filePath:'graph/draw/generated/queryModel.drawio'}):await call({surface:'editor',action:'openSource',filePath:'graph/draw/generated/queryModel.drawio',stableId:sourceStart,endStableId:sourceEnd,editorAreaHeight:960,placement:'BELOW'});
+ if(diagramOnly)await wait(1200);
  const framing=lower?{bottomStableId:lower.stableId,bottomCellId:lower.cellId}:{scale:explicitScale};
+ if(clean(row[9])){const right=head(clean(row[9]));Object.assign(framing,{rightStableId:right.stableId,rightCellId:right.cellId});}
  await call({...base,action:'presentFocus',...horizontal,...framing,topPadding:16,durationMs:0});
  const fitted=await call({...base,action:'presentRead'});
  await call({...base,action:'presentFocus',...horizontal,scale:fitted.camera.scale,topPadding:16,durationMs:0});
  await call({...base,action:'presentPointer',pointerId:'narrator',visible:false});
- await call({surface:'editor',action:'sourcePointer',visible:false,stableId:owner});
+ if(!diagramOnly)await call({surface:'editor',action:'sourcePointer',visible:false,stableId:owner});
  const initial=await call({...base,action:'presentRead'});assert(initial.visible);
  // Continued shots start at the family top plus a small fixed gap. Do not
  // retain the preceding step merely because a minimal reveal would allow it.
@@ -97,7 +107,7 @@ try{
  assert(!lowerFrame||lowerFrame.visible,'Lower framing target must fit before recording');
  if(row[3]==='2'){
   const diagramPointer=await call({...base,action:'presentPointer',pointerId:'narrator',durationMs:0});
-  const codePointer=await call({surface:'editor',action:'sourcePointer',stableId:upper.stableId});
+  const codePointer=diagramOnly?null:await call({surface:'editor',action:'sourcePointer',stableId:upper.stableId});
   const pointerFrame=await call({...base,action:'presentRead'});
   assert(pointerFrame.visible&&JSON.stringify(pointerFrame.camera)===JSON.stringify(initial.camera),'Pointer must not scroll the scene');
   events.push({type:'dual-pointers',diagramPointer,codePointer,pointerFrame});
@@ -124,7 +134,7 @@ try{
  for(const marker of timedMarkers){
   await wait(Math.max(0,marker.time-1)*1000-(performance.now()-start));
   const diagramPointer=await call({surface:'diagram',action:'presentPointer',stableId:marker.stableId,cellId:marker.cellId,pointerId:'narrator',durationMs:200});
-  const codePointer=await call({surface:'editor',action:'sourcePointer',stableId:marker.sourceStableId});
+  const codePointer=diagramOnly?null:await call({surface:'editor',action:'sourcePointer',stableId:marker.sourceStableId});
   const frame=await call({surface:'diagram',action:'presentRead',stableId:marker.stableId,cellId:marker.cellId});assert(frame.visible,'Narrated target outside frame');
   events.push({type:'narration-pointer',...marker,readyTime:(performance.now()-start)/1000,diagramPointer,codePointer});
  }
