@@ -19,6 +19,7 @@ SHEETS = ROOT.parent / 'google-sheets-mcp'
 SID = '1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
 parser = argparse.ArgumentParser()
 parser.add_argument('--row', type=int, default=12)
+parser.add_argument('--current-columns',action='store_true')
 args = parser.parse_args()
 if args.row < 2:
     parser.error('row must be >= 2')
@@ -34,13 +35,13 @@ async def main():
     async with stdio_client(params) as (reader, writer):
         async with ClientSession(reader, writer) as client:
             await client.initialize()
-            for name, notation in [('headers', '!A1:Z1'), ('scene', f'!A{args.row}:M{args.row}')]:
+            for name, notation in [('headers', '!A1:Z1'), ('scene', f'!A{args.row}:{"P" if args.current_columns else "M"}{args.row}')]:
                 result = await client.call_tool('get_sheet_data_by_notation', {'spreadsheet_id': SID, 'notation': notation})
                 if result.isError:
                     raise RuntimeError(str(result.content))
                 snapshots[name] = json.loads(result.content[0].text)
     row = snapshots['scene']['values'][0]
-    if row[11] != '3.3':
+    if row[15 if args.current_columns else 11] != '3.3':
         raise RuntimeError('Voice selection changed; resolve it before synthesis')
     reference = material_dir() / 'scene-row011-captions-1790056098495880100/request.json'
     previous_request = json.loads(reference.read_text(encoding='utf-8'))
@@ -53,7 +54,7 @@ async def main():
         json.load(response)
     out = material_dir() / f'scene-row{args.row:03d}-{time.time_ns()}'
     out.mkdir()
-    save(out / 'sheet-source.json', snapshots)
+    save(out / 'sheet-source.json', snapshots['scene'] if args.current_columns else snapshots)
     payload = {'text': row[0].strip(), 'model_id': 'eleven_v3', 'voice_settings': {'stability': 0.5, 'similarity_boost': 1.0}}
     save(out / 'request.json', {'voice_id': voice, **payload})
     print('OUTPUT=' + str(out), flush=True)
