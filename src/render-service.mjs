@@ -33,7 +33,9 @@ export async function renderScene({sceneDir,mode='video',time=0,filename,signal,
  const abort=()=>{encoder?.kill();void browser?.close().catch(()=>{});};signal?.addEventListener('abort',abort,{once:true});
  try{
   const args=['-nostdin','-n','-hide_banner','-loglevel','error'];
-  if(mode==='preview')args.push('-ss',String(time));
+  const still=/\.(png|jpg|jpeg)$/i.test(recording);
+  if(still)args.push('-loop','1');
+  else if(mode==='preview')args.push('-ss',String(time));
   args.push('-i',recording,'-f','image2pipe','-framerate','30','-vcodec','png','-i','pipe:0');
   if(speech)args.push('-i',speech);
   args.push('-filter_complex','[0:v]fps=30,setsar=1[v];[v][1:v]overlay=0:0:format=auto[out]','-map','[out]');
