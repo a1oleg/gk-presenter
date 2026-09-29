@@ -1,12 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
 import {connectObs} from './obs_control.mjs';
 const out=path.resolve(process.argv[2]);
 const rowNumber=Number(process.argv[3]||37);
 const read=async n=>JSON.parse(await fs.readFile(path.join(out,n),'utf8'));
 const row=(await read('sheet-source.json')).values[0];
+// Current sheet removed the separate scale column; normalize only in memory.
+if(row.length===15&&row[14]==='3.3')row.splice(11,0,'');
 const diagramOnly=rowNumber===42&&!row[4];
 assert(row[15]==='3.3'&&['','2'].includes(row[3]||'')&&['','снизу'].includes(row[4]));
 const clean=v=>String(v||'').replace(/^stableId:\s*/,'').trim();

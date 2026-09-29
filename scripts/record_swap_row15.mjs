@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';import path from 'node:path';
-import {bridge,diagramIndex} from '../../graphKoda/graph/presentation/presentation.mjs';
+import {bridge,diagramIndex} from '../../coldKode/graph/presentation/presentation.mjs';
 import {connectObs} from './obs_control.mjs';
 import {materialDir} from '../src/material-paths.mjs';
 const out=path.resolve(process.argv[2]),read=async f=>JSON.parse(await fs.readFile(f,'utf8'));

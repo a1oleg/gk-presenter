@@ -15,9 +15,13 @@ const {resolveViewer}=await import(pathToFileURL(path.join(inspector,'src/render
 const out=path.resolve(process.argv[2]);
 const [canvasWidth,canvasHeight]=(process.env.PRESENTER_CANVAS||'1600x900').split('x').map(Number);
 const fixedScale=process.env.PRESENTER_SCALE?Number(process.env.PRESENTER_SCALE):null;
+const tightExport=process.env.PRESENTER_TIGHT_EXPORT==='1';
 if(fixedScale!==null&&(!Number.isFinite(fixedScale)||fixedScale<=0))throw Error('Invalid fixed scale');
 if(!Number.isInteger(canvasWidth)||!Number.isInteger(canvasHeight)||canvasWidth<100||canvasHeight<100)throw Error('Invalid canvas');
 const file=path.join(out,'source.drawio');
+const revealPlan=process.env.PRESENTER_REVEAL_PLAN?JSON.parse(await fs.readFile(process.env.PRESENTER_REVEAL_PLAN,'utf8')):null;
+const sheetBounds=process.env.PRESENTER_SHEET_BOUNDS==='1'
+ ? JSON.parse(await fs.readFile(path.join(out,'sheet-source.json'),'utf8')).values[0].slice(7,11).map(s=>s.replace(/^stableId:\s*/,'')):null;
 const client=new Client({name:'presenter-scene',version:'1.0.0'});
 try {
  await client.connect(new StdioClientTransport({command:process.execPath,args:[path.join(inspector,'src/mcp.mjs')]}));
@@ -45,7 +49,10 @@ for(const url of new Set([...xml.matchAll(/image=(https?:[^;]+);/g)].map(m=>m[1]
 await fs.writeFile(path.join(out,'assets.json'),JSON.stringify(assets,null,2));
 // Built-in draw.io clipart is relative to the webapp, not to about:blank.
 for(const relative of new Set([...xml.matchAll(/image=(img\/[^;"]+)(?=;|")/g)].map(m=>m[1]))) {
- const webapp=path.resolve(root,'../graphKoda/graph/vendor/drawio/src/main/webapp');
+ const candidates=['../graphKoda','../coldKode'];
+ let webapp;
+ for(const candidate of candidates){const p=path.resolve(root,candidate,'graph/vendor/drawio/src/main/webapp');try{await fs.access(p);webapp=p;break;}catch{}}
+ if(!webapp)throw Error('draw.io webapp not found');
  const local=path.resolve(webapp,relative);
  if(!local.startsWith(webapp+path.sep))throw Error('Asset outside draw.io webapp');
  const bytes=await fs.readFile(local);
@@ -60,16 +67,40 @@ try{
  const page=await ctx.newPage();
  await page.setContent(`<html><body style="margin:0;overflow:hidden;background:white"><div id="graph" style="width:${canvasWidth}px;height:${canvasHeight}px"></div></body></html>`);
  await page.addScriptTag({path:await resolveViewer()});
- const geometry=await page.evaluate(async ({xml,focusCellId,canvasWidth,canvasHeight,fixedScale})=>{
+ const geometry=await page.evaluate(async ({xml,focusCellId,canvasWidth,canvasHeight,fixedScale,sheetBounds,tightExport})=>{
   const graph=new Graph(document.getElementById('graph'));graph.setEnabled(false);
+  window.presenterGraph=graph;
   const doc=mxUtils.parseXml(xml);
   new mxCodec(doc).decode(doc.getElementsByTagName('mxGraphModel')[0],graph.getModel());
   graph.getView().scaleAndTranslate(1,0,0);graph.getView().validate();
   // Fit visible content, not unused editor page margins; preserve all relative positions.
-  const b=focusCellId?graph.getView().getState(graph.getModel().getCell(focusCellId)):graph.getGraphBounds();
+  let b=focusCellId?graph.getView().getState(graph.getModel().getCell(focusCellId)):graph.getGraphBounds();
+  if(sheetBounds){
+   const bounds=sheetBounds.map(id=>{
+    const ids=Array.from(doc.querySelectorAll('[stableId]')).filter(e=>e.getAttribute('stableId')===id).map(e=>e.getAttribute('id'));
+    const matches=ids.map(id=>graph.getModel().getCell(id)).filter(c=>c?.vertex).map(c=>graph.getView().getState(c)).filter(Boolean);
+    if(!matches.length)throw Error('Missing framing stableId: '+id);
+    return {x:Math.min(...matches.map(s=>s.x)),y:Math.min(...matches.map(s=>s.y)),right:Math.max(...matches.map(s=>s.x+s.width)),bottom:Math.max(...matches.map(s=>s.y+s.height))};
+   });
+   b={x:bounds[1].x-24,y:bounds[0].y-24,width:bounds[2].right-bounds[1].x+48,height:bounds[3].bottom-bounds[0].y+48};
+   if(b.width<=0||b.height<=0)throw Error('Invalid framing bounds');
+  }
   if(!b)throw Error('Focus cell missing: '+focusCellId);
-  const scale=fixedScale??Math.min(canvasWidth*.9/b.width,canvasHeight*(700/900)/b.height);
-  const tx=(canvasWidth/scale-b.width)/2-b.x,ty=fixedScale!==null?32/scale-b.y:(canvasHeight/scale-b.height)/2-b.y;
+  if(tightExport){
+   const boxes=[];
+   for(const c of Object.values(graph.getModel().cells)){
+    const s=graph.getView().getState(c);if(!s||(!c.vertex&&!c.edge))continue;
+    const group=c.vertex&&c.children?.some(k=>k.vertex)&&!s.shape;
+    if(group||String(c.style||'').startsWith('group;'))continue;
+    const box=s.shape?.boundingBox||s;boxes.push(box);
+    if(s.text?.boundingBox)boxes.push(s.text.boundingBox);
+   }
+   const x=Math.min(...boxes.map(r=>r.x)),y=Math.min(...boxes.map(r=>r.y));
+   b={x,y,width:Math.max(...boxes.map(r=>r.x+r.width))-x,height:Math.max(...boxes.map(r=>r.y+r.height))-y};
+  }
+  const scale=tightExport?(fixedScale??1.5):(fixedScale??Math.min(canvasWidth*(sheetBounds?1:.9)/b.width,canvasHeight*(sheetBounds?1:700/900)/b.height));
+  if(tightExport){canvasWidth=Math.ceil(b.width*scale)+32;canvasHeight=Math.ceil(b.height*scale)+32;}
+  const tx=tightExport?16/scale-b.x:(canvasWidth/scale-b.width)/2-b.x,ty=tightExport?16/scale-b.y:fixedScale!==null?32/scale-b.y:(canvasHeight/scale-b.height)/2-b.y;
   graph.getView().scaleAndTranslate(scale,tx,ty);graph.getView().validate();
   await document.fonts.ready;
   await Promise.all([...document.querySelectorAll('image')].map(e=>new Promise((res,rej)=>{
@@ -83,8 +114,31 @@ try{
    cells[cell.id]={x:s.x,y:s.y,width:s.width,height:s.height,edge:!!cell.edge,points:s.absolutePoints?.filter(Boolean).map(p=>({x:p.x,y:p.y}))};
   }
   return{width:canvasWidth,height:canvasHeight,scale,translation:{x:tx,y:ty},cells};
- },{xml,focusCellId:process.argv[4]||null,canvasWidth,canvasHeight,fixedScale});
+ },{xml,focusCellId:process.argv[4]||null,canvasWidth,canvasHeight,fixedScale,sheetBounds,tightExport});
+ if(tightExport)await page.setViewportSize({width:geometry.width,height:geometry.height});
  await fs.writeFile(path.join(out,'screen-geometry.json'),JSON.stringify(geometry,null,2));
  await page.screenshot({path:path.join(out,'scene.png')});
+ if(revealPlan){
+  for(const [index,stage] of revealPlan.stages.entries()){
+   const state=await page.evaluate(({plan,stage})=>{
+    const graph=window.presenterGraph,model=graph.getModel();
+    const all=Object.values(model.cells);
+    const original=window.presenterVisibility??=Object.fromEntries(all.map(c=>[c.id,c.visible]));
+    function belongs(c,ids){for(let p=c;p;p=p.parent)if(ids.includes(p.id))return true;return false;}
+    model.beginUpdate();try{
+     for(const c of all){
+      const owner=plan.groups.findIndex(g=>belongs(c,g));
+      const visible=owner<0||owner<stage.show;
+      model.setVisible(c,original[c.id]!==false&&visible&&!stage.hide?.includes(c.id));
+     }
+    }finally{model.endUpdate();}
+    graph.getView().validate();
+    return {scale:graph.view.scale,translation:graph.view.translate,visible:all.filter(c=>graph.view.getState(c)).map(c=>c.id)};
+   },{plan:revealPlan,stage});
+   if(state.scale!==geometry.scale||state.translation.x!==geometry.translation.x||state.translation.y!==geometry.translation.y)throw Error('Reveal changed framing');
+   await page.screenshot({path:path.join(out,`stage-${index}.png`)});
+   await fs.writeFile(path.join(out,`stage-${index}.json`),JSON.stringify({...stage,...state},null,2));
+  }
+ }
  console.log('Scene exported, objects:',Object.keys(geometry.cells).length);
 }finally{await browser.close();}

@@ -1,0 +1,39 @@
+{
+  "groups": [
+    ["etl-sketch-1"],
+    ["etl-sketch-2", "459", "etl-sketch-2-link-swap"],
+    ["etl-sketch-3"],
+    ["etl-sketch-4", "454", "455"],
+    ["etl-sketch-6", "444", "447"],
+    ["448", "449"]
+  ],
+  "stages": [
+    {"at": 0, "show": 0},
+    {"anchor": "Допустим", "show": 1},
+    {"anchor": "Парсер", "show": 2},
+    {"anchor": "Сначала они", "show": 3},
+    {"anchor": "Решение:", "show": 4},
+    {"anchor": "Обратите внимание", "show": 4, "hide": ["etl-sketch-4-node-0", "455"]},
+    {"anchor": "Первыми", "show": 5, "hide": ["etl-sketch-4-node-0", "455"]},
+    {"anchor": "После этого", "show": 6, "hide": ["etl-sketch-4-node-0", "455"]}
+  ],
+  "markers": [
+    {"anchor": "Клод код", "cellId": "source"},
+    {"anchor": "нужен конвейер", "cellId": "extractor"},
+    {"anchor": "Допустим", "cellId": "etl-sketch-1-paper-shuffle"},
+    {"anchor": "Парсер", "cellId": "parser"},
+    {"anchor": "абстрактное", "cellId": "456"},
+    {"anchor": "Экстрактор", "cellId": "extractor"},
+    {"anchor": "Сначала они", "cellId": "etl-sketch-3-row-1"},
+    {"anchor": "Никакого связного", "cellId": "etl-sketch-3-row-2"},
+    {"anchor": "У Neo", "cellId": "228"},
+    {"anchor": "Решение:", "cellId": "etl-sketch-4-nodes-title"},
+    {"anchor": "дважды", "cellId": "453"},
+    {"anchor": "дедупликацию", "cellId": "duckdb"},
+    {"anchor": "Обратите внимание", "cellId": "etl-sketch-4-edge-0"},
+    {"anchor": "Подготовленные", "cellId": "parquet"},
+    {"anchor": "Первыми", "cellId": "444"},
+    {"anchor": "После этого", "cellId": "445"},
+    {"anchor": "индексированном", "cellId": "447"}
+  ]
+}

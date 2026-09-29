@@ -9,7 +9,14 @@ a=json.loads((out/'alignment.json').read_text(encoding='utf8'));a=a.get('normali
 text=''.join(a['characters']).lower()
 geo=json.loads((out/'screen-geometry.json').read_text())['cells']
 def cue(s):return a['character_start_times_seconds'][text.index(s)]
-route=([(0,'c10'),(cue('заглушку'),'stub-check'),(cue('логикой агента'),'c8'),
+route=([(0,'source'),(cue('как данные'),'source'),(cue('опираюсь на codeql'),'codeql'),
+        (cue('парсер typescript'),'parser'),(cue('абстрактное'),'ast'),
+        (cue('через api'),'compiler-api'),(cue('сведения о типах'),'checker'),
+        (cue('codeql дополняет'),'codeql'),(cue('на выходе экстрактора'),'extractor'),
+        (cue('промежуточную базу'),'duckdb'),(cue('в ней объединяются'),'duckdb'),
+        (cue('сохраняются в parquet'),'parquet'),(cue('импортёр создаёт'),'importer'),
+        (cue('в neo4j'),'199'),(cue('соединяет их отношениями'),'330')] if 'duckdb' in geo else
+ [(0,'c10'),(cue('заглушку'),'stub-check'),(cue('логикой агента'),'c8'),
         (cue('в самом начале'),'c10'),(cue('клиента'),'c14'),
         (cue('если заглушка'),'stub-check'),(cue('записываем'),'stub-record'),
         (cue('возвращаем'),'stub-yield')] if 'stub-check' in geo else
@@ -22,6 +29,7 @@ route=([(0,'c10'),(cue('заглушку'),'stub-check'),(cue('логикой а
 points=[]
 for t,id in route:
  b=geo[id];points.append((t,(b['x']+b['width']*.7,b['y']+b['height']+3)))
+assert all(0<=x<=1875 and 0<=y<=1033 for _,(x,y) in points),'Pointer must fit canvas'
 def pos(t):
  p=points[0][1]
  for j,(end,q) in enumerate(points[1:],1):
