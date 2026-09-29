@@ -19,7 +19,7 @@ async def main():
      if not any(normalized.lower().startswith(str(ROOT/kind).lower()+'\\') for kind in ['data','output']):continue
      target=Path(value).resolve();address=f'{chr(65+col)}{row}'
      if not target.exists():missing.append({'cell':address,'path':value});continue
-     assert str(target).lower().startswith('c:\\users\\a1ole\\onedrive\\graphKoda-presenter\\')
+     assert str(target).lower().startswith('c:\\users\\a1ole\\onedrive\\gk-presenter\\')
      updates.append({'range':f"'Видео'!{address}",'values':[[str(target)]]})
    (ROOT/'tmp/onedrive-sheet-before.json').write_text(json.dumps(original,ensure_ascii=False,indent=2),encoding='utf8')
    assert (await read())['values']==values,'Sheet changed during migration'

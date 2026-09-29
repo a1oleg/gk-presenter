@@ -43,7 +43,7 @@ try{
   await page.screenshot({path:path.join(out,i?'sequence.png':'flow.png')});
  }
 }finally{await browser.close();}
-const ff=execFileSync('C:/GitHub/graphKoda-presenter/.venv/Scripts/python.exe',['-c','import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())'],{encoding:'utf8'}).trim();
+const ff=execFileSync('C:/GitHub/gk-presenter/.venv/Scripts/python.exe',['-c','import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())'],{encoding:'utf8'}).trim();
 execFileSync(ff,['-hide_banner','-loglevel','error','-n','-loop','1','-framerate','30','-t','4','-i',path.join(out,'flow.png'),'-loop','1','-framerate','30','-t','4','-i',path.join(out,'sequence.png'),'-filter_complex','[0:v][1:v]xfade=transition=fade:duration=2:offset=2,format=yuv420p[v]','-map','[v]','-t','6','-c:v','libx264','-crf','18',path.join(out,'transition.mp4')],{windowsHide:true});
 await fs.writeFile(path.join(out,'scenario.json'),JSON.stringify({files,camera,anchors,transition:{kind:'fade',start:2,duration:2,total:6}},null,2));
 console.log(JSON.stringify({out,anchors,findings:reports[0].findings}));

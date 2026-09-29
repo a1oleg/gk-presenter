@@ -6,7 +6,7 @@ import asyncio,base64,json,subprocess,time,urllib.request,sys
 from pathlib import Path
 from mcp import ClientSession,StdioServerParameters
 from mcp.client.stdio import stdio_client
-ROOT=Path('C:/GitHub/graphKoda-presenter');SID='1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
+ROOT=Path('C:/GitHub/gk-presenter');SID='1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
 ROW=int(sys.argv[1]) if len(sys.argv)>1 else 7
 async def main():
  async with stdio_client(StdioServerParameters(command='C:/GitHub/google-sheets-mcp/.venv/Scripts/python.exe',args=['C:/GitHub/google-sheets-mcp/server.py'])) as (r,w):

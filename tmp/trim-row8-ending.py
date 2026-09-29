@@ -8,7 +8,7 @@ import av, imageio_ffmpeg
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-ROOT=Path('C:/GitHub/graphKoda-presenter')
+ROOT=Path('C:/GitHub/gk-presenter')
 SID='1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
 ENDING='Обратите внимание, что я изменил тему подсветки синтаксиса, чтобы она сочеталась с диаграммой.'
 def save(path,obj):

@@ -6,7 +6,7 @@ import asyncio,base64,json,subprocess,time,urllib.request
 from pathlib import Path
 from mcp import ClientSession,StdioServerParameters
 from mcp.client.stdio import stdio_client
-ROOT=Path('C:/GitHub/graphKoda-presenter'); SHEETS=ROOT.parent/'google-sheets-mcp'
+ROOT=Path('C:/GitHub/gk-presenter'); SHEETS=ROOT.parent/'google-sheets-mcp'
 SID='1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
 async def main():
  async with stdio_client(StdioServerParameters(command=str(SHEETS/'.venv/Scripts/python.exe'),args=[str(SHEETS/'server.py')])) as (r,w):

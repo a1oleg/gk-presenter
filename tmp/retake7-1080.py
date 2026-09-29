@@ -6,7 +6,7 @@ import asyncio,json,time,shutil,subprocess,hashlib
 from pathlib import Path
 from mcp import ClientSession,StdioServerParameters
 from mcp.client.stdio import stdio_client
-ROOT=Path('C:/GitHub/graphKoda-presenter');SID='1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
+ROOT=Path('C:/GitHub/gk-presenter');SID='1otWSZpQP7BueI3vrWpc5M4qOgPxgBbpGEIW8yMEvjSw'
 async def main():
  async with stdio_client(StdioServerParameters(command='C:/GitHub/google-sheets-mcp/.venv/Scripts/python.exe',args=['C:/GitHub/google-sheets-mcp/server.py'])) as (r,w):
   async with ClientSession(r,w) as c:

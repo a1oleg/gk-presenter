@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
-$repo = 'C:\GitHub\graphKoda-presenter'
-$destinationRoot = 'C:\Users\a1ole\OneDrive\graphKoda-presenter'
+$repo = 'C:\GitHub\gk-presenter'
+$destinationRoot = 'C:\Users\a1ole\OneDrive\gk-presenter'
 $oneDriveRoot = (Resolve-Path -LiteralPath 'C:\Users\a1ole\OneDrive').Path
 if (-not $destinationRoot.StartsWith($oneDriveRoot + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Unsafe destination' }
 $targets = @('data', 'output')
