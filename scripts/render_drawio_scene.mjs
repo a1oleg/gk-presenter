@@ -16,6 +16,8 @@ const out=path.resolve(process.argv[2]);
 const [canvasWidth,canvasHeight]=(process.env.PRESENTER_CANVAS||'1600x900').split('x').map(Number);
 const fixedScale=process.env.PRESENTER_SCALE?Number(process.env.PRESENTER_SCALE):null;
 const tightExport=process.env.PRESENTER_TIGHT_EXPORT==='1';
+const fragment=process.env.PRESENTER_FRAGMENT?JSON.parse(await fs.readFile(process.env.PRESENTER_FRAGMENT,'utf8')):null;
+if(fragment&&(!Array.isArray(fragment.cellIds)||!fragment.cellIds.length))throw Error('Fragment requires cellIds');
 if(fixedScale!==null&&(!Number.isFinite(fixedScale)||fixedScale<=0))throw Error('Invalid fixed scale');
 if(!Number.isInteger(canvasWidth)||!Number.isInteger(canvasHeight)||canvasWidth<100||canvasHeight<100)throw Error('Invalid canvas');
 const file=path.join(out,'source.drawio');
@@ -25,7 +27,7 @@ const sheetBounds=process.env.PRESENTER_SHEET_BOUNDS==='1'
 const client=new Client({name:'presenter-scene',version:'1.0.0'});
 try {
  await client.connect(new StdioClientTransport({command:process.execPath,args:[path.join(inspector,'src/mcp.mjs')]}));
- for(const [name,args] of [['inspect_region',{cellId:process.argv[3]||'228',padding:10000}],['validate_geometry',{}]]) {
+ for(const [name,args] of [['inspect_region',{cellId:process.argv[3]||'228',padding:10000}]]) {
   const r=await client.callTool({name,arguments:{file,mode:'rendered',limit:500,...args}},undefined,{timeout:180000});
   if(r.isError)throw Error(JSON.stringify(r.content));
   const reportDir=name==='inspect_region'?inspectionCacheDir(out):out;
@@ -67,11 +69,26 @@ try{
  const page=await ctx.newPage();
  await page.setContent(`<html><body style="margin:0;overflow:hidden;background:white"><div id="graph" style="width:${canvasWidth}px;height:${canvasHeight}px"></div></body></html>`);
  await page.addScriptTag({path:await resolveViewer()});
- const geometry=await page.evaluate(async ({xml,focusCellId,canvasWidth,canvasHeight,fixedScale,sheetBounds,tightExport})=>{
+ const geometry=await page.evaluate(async ({xml,focusCellId,canvasWidth,canvasHeight,fixedScale,sheetBounds,tightExport,fragment})=>{
   const graph=new Graph(document.getElementById('graph'));graph.setEnabled(false);
   window.presenterGraph=graph;
   const doc=mxUtils.parseXml(xml);
   new mxCodec(doc).decode(doc.getElementsByTagName('mxGraphModel')[0],graph.getModel());
+  let fragmentSelected=null;
+  if(fragment){
+   const model=graph.getModel(),cells=Object.values(model.cells),selected=new Set();
+   const collect=c=>{selected.add(c.id);for(const child of c.children||[])collect(child);};
+   for(const id of fragment.cellIds){const cell=model.getCell(id);if(!cell||!cell.vertex)throw Error('Fragment vertex not found: '+id);collect(cell);}
+   // Show complete selected subtrees and only edges joining their vertices.
+   for(const cell of cells)if(cell.edge&&selected.has(cell.source?.id)&&selected.has(cell.target?.id))collect(cell);
+   const visible=new Set(selected);
+   for(const id of selected)for(let p=model.getCell(id)?.parent;p;p=p.parent)visible.add(p.id);
+   fragmentSelected=selected;
+   model.beginUpdate();try{for(const cell of cells){
+    model.setVisible(cell,visible.has(cell.id));
+    if(visible.has(cell.id)&&!selected.has(cell.id)&&cell.vertex){model.setStyle(cell,'group;fillColor=none;strokeColor=none;');model.setValue(cell,'');}
+   }}finally{model.endUpdate();}
+  }
   graph.getView().scaleAndTranslate(1,0,0);graph.getView().validate();
   // Fit visible content, not unused editor page margins; preserve all relative positions.
   let b=focusCellId?graph.getView().getState(graph.getModel().getCell(focusCellId)):graph.getGraphBounds();
@@ -89,6 +106,7 @@ try{
   if(tightExport){
    const boxes=[];
    for(const c of Object.values(graph.getModel().cells)){
+    if(fragmentSelected&&!fragmentSelected.has(c.id))continue;
     const s=graph.getView().getState(c);if(!s||(!c.vertex&&!c.edge))continue;
     const group=c.vertex&&c.children?.some(k=>k.vertex)&&!s.shape;
     if(group||String(c.style||'').startsWith('group;'))continue;
@@ -113,10 +131,20 @@ try{
    const s=graph.getView().getState(cell);if(!s)continue;
    cells[cell.id]={x:s.x,y:s.y,width:s.width,height:s.height,edge:!!cell.edge,points:s.absolutePoints?.filter(Boolean).map(p=>({x:p.x,y:p.y}))};
   }
-  return{width:canvasWidth,height:canvasHeight,scale,translation:{x:tx,y:ty},cells};
- },{xml,focusCellId:process.argv[4]||null,canvasWidth,canvasHeight,fixedScale,sheetBounds,tightExport});
+  const clipped=[];
+  if(tightExport)for(const cell of Object.values(graph.getModel().cells)){
+   if(fragmentSelected&&!fragmentSelected.has(cell.id))continue;
+   const state=graph.getView().getState(cell);if(!state||(!cell.vertex&&!cell.edge)||String(cell.style||'').startsWith('group;'))continue;
+   if(cell.vertex&&cell.children?.some(c=>c.vertex)&&!state.shape)continue;
+   for(const box of [state.shape?.boundingBox,state.text?.boundingBox].filter(Boolean))
+    if(box.x<0||box.y<0||box.x+box.width>canvasWidth||box.y+box.height>canvasHeight)clipped.push(cell.id);
+  }
+  return{width:canvasWidth,height:canvasHeight,scale,translation:{x:tx,y:ty},cells,frameValidation:{scope:'rendered shape and text containment, not collision analysis',checked:tightExport,clipped:[...new Set(clipped)]}};
+ },{xml,focusCellId:process.argv[4]||null,canvasWidth,canvasHeight,fixedScale,sheetBounds,tightExport,fragment});
  if(tightExport)await page.setViewportSize({width:geometry.width,height:geometry.height});
  await fs.writeFile(path.join(out,'screen-geometry.json'),JSON.stringify(geometry,null,2));
+ await fs.writeFile(path.join(out,'validate_geometry.json'),JSON.stringify(geometry.frameValidation,null,2));
+ if(geometry.frameValidation.clipped.length)throw Error('Export would clip diagram cells: '+geometry.frameValidation.clipped.join(', '));
  await page.screenshot({path:path.join(out,'scene.png')});
  if(revealPlan){
   for(const [index,stage] of revealPlan.stages.entries()){

@@ -10,7 +10,8 @@
     "test": "node --test",
     "render:serve": "node scripts/serve-render.mjs",
     "check": "node src/check-lesson.mjs examples/lesson.json",
-    "produce": "node scripts/produce.mjs"
+    "produce": "node scripts/produce.mjs",
+    "pipeline": "node scripts/pipeline.mjs"
   },
   "engines": {
     "node": ">=22"

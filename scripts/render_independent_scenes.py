@@ -58,7 +58,7 @@ def validate_track(file,size,fps,frames):
             raise ValueError('Track frame count differs')
 
 
-def run(manifest,base):
+def run(manifest,base,output=None,check_only=False):
     def file(key):
         return (base/manifest[key]).resolve()
     diagram_path,code_path=file('diagramImage'),file('codeSnapshot')
@@ -67,6 +67,8 @@ def run(manifest,base):
     source_file=Path(source['source'])
     if not source_file.is_absolute(): source_file=code_path.parent/source_file
     actual=source_file.read_text(encoding='utf-8-sig').splitlines()
+    if source.get('sourceSha256') and digest(source_file)!=source['sourceSha256']:
+        raise ValueError('Code source changed after semantic snapshot')
     if any(n<1 or n>len(actual) or line!=actual[n-1] for line,n in zip(source['code'].split('\n'),source['lineMap'])):
         raise ValueError('Code snapshot differs from source file')
     inputs.append(source_file)
@@ -95,12 +97,18 @@ def run(manifest,base):
     if any(not 0<=e['time']<duration for e in events) or any(a['time']>b['time'] for a,b in zip(events,events[1:])):
         raise ValueError('Events must be ordered and within the clip')
     geo=None
-    if events:
+    if events or manifest.get('minimumDiagramScale') is not None:
         inputs.append(file('diagramGeometry'));geo=json.loads(file('diagramGeometry').read_text(encoding='utf8'))
         if (geo['width'],geo['height'])!=original_size: raise ValueError('Diagram geometry differs from image')
         for e in events:
             if e['codeLine'] not in source['lineMap'] or e['diagramCell'] not in geo['cells']:
                 raise ValueError('Event target missing from an independent scene')
+            box=geo['cells'][e['diagramCell']]
+            if box['x']<0 or box['y']<0 or box['x']+box['width']>original_size[0]+1 or box['y']+box['height']>original_size[1]+1:
+                raise ValueError('Diagram target is clipped in its export')
+    diagram_scale=min(fitted.width/original_size[0],fitted.height/original_size[1])*(geo.get('scale',1) if geo else 1)
+    if diagram_scale < manifest.get('minimumDiagramScale',0):
+        raise ValueError('Diagram is too small to read; select a smaller fragment or enlarge its track')
     audio=file('audio') if manifest.get('audio') else None
     if audio:
         inputs.append(audio)
@@ -108,7 +116,14 @@ def run(manifest,base):
             if not media.streams.audio or media.duration is None or media.duration/av.time_base<duration-.05:
                 raise ValueError('Prepared audio is shorter than clip')
     hashes={str(f):digest(f) for f in inputs}
-    out=Path(tempfile.mkdtemp(prefix='independent-scenes-',dir=material_dir()))
+    if check_only:
+        return {'ok':True,'codeFontSize':layout['fontSize'],'diagramScale':diagram_scale,'events':len(events)}
+    if output is None:
+        out=Path(tempfile.mkdtemp(prefix='independent-scenes-',dir=material_dir()))
+    else:
+        out=Path(output).resolve();material_root=material_dir().resolve()
+        if out==material_root or not out.is_relative_to(material_root):raise ValueError('Output must be within configured material output')
+        out.mkdir(exist_ok=False)
     (out/'composition.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf8')
     frames=math.ceil(duration*fps-1e-9);ff=imageio_ffmpeg.get_ffmpeg_exe()
     def render_frame(name,t):
@@ -144,16 +159,22 @@ def run(manifest,base):
     if audio:cmd+=['-map','2:a:0','-c:a','aac','-b:a','192k']
     cmd+=['-t',str(frames/fps),'-c:v','libx264','-preset','fast','-crf','18','-pix_fmt','yuv420p','-movflags','+faststart',str(out/'composed.mp4')]
     subprocess.run(cmd,check=True);validate_track(out/'composed.mp4',(width,height),fps,frames)
+    audio_seconds=None
+    if audio:
+        with av.open(str(out/'composed.mp4')) as media:
+            if len(media.streams.audio)!=1:raise ValueError('Expected one narration track')
+            audio_seconds=sum(frame.samples/frame.sample_rate for frame in media.decode(audio=0))
+        if abs(audio_seconds-frames/fps)>.1:raise ValueError('Narration and composed video duration differ')
     preview=Image.new('RGB',(width,height),'#172536')
     for name,r in [('diagram',d),('code',c)]:preview.paste(render_frame(name,min(duration/2,(frames-1)/fps)),(r['x'],r['y']))
     preview.save(out/'composed.png')
     if any(digest(f)!=h for f,h in hashes.items()):raise ValueError('Source changed during render')
-    report={'output':str(out),'tracks':['diagram.mp4','code.mp4'],'composition':'composed.mp4','frames':frames,'fps':fps,'sourceHashes':hashes,'codeFontSize':layout['fontSize'],'diagramFit':'contain, no crop','sourceAssetsUnchanged':True,'editorWindowCaptureUsed':False,'events':len(events)}
+    report={'output':str(out),'tracks':['diagram.mp4','code.mp4'],'composition':'composed.mp4','frames':frames,'fps':fps,'audioSeconds':audio_seconds,'sourceHashes':hashes,'codeFontSize':layout['fontSize'],'diagramScale':diagram_scale,'diagramFit':'contain, no crop','sourceAssetsUnchanged':True,'editorWindowCaptureUsed':False,'events':len(events)}
     (out/'composition-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
     return report
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('manifest',type=Path);args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('manifest',type=Path);parser.add_argument('--output',type=Path);parser.add_argument('--check',action='store_true');args=parser.parse_args()
     manifest=args.manifest.resolve()
-    print(json.dumps(run(json.loads(manifest.read_text(encoding='utf-8-sig')),manifest.parent),ensure_ascii=True))
+    print(json.dumps(run(json.loads(manifest.read_text(encoding='utf-8-sig')),manifest.parent,args.output,args.check),ensure_ascii=True))

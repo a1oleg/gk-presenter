@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "title": "Fisher-Yates: independent diagram and code scenes",
+  "canvas": {"width": 1920, "height": 1080, "fps": 30},
+  "durationSeconds": 5,
+  "font": "C:/Windows/Fonts/consola.ttf",
+  "diagram": {
+    "file": "../../coldKode/graph/draw/generated/Fisher-Yates.drawio",
+    "cellIds": ["f0-fold-row-4", "f0-fold-row-5", "f0-fold-row-6"],
+    "minimumScale": 0.75
+  },
+  "code": {
+    "file": "../../coldKode/examples/fisher-yates/src/shuffle.ts",
+    "semanticRoot": "../../coldKode/graph/vscode-source-colors",
+    "lines": [[25,29]],
+    "fontSize": 30,
+    "minimumFontSize": 18
+  },
+  "tracks": {
+    "diagram": {"x": 24, "y": 24, "width": 920, "height": 1032},
+    "code": {"x": 976, "y": 24, "width": 920, "height": 1032}
+  },
+  "events": [
+    {"time": 0.766, "diagramCell": "f0-n9-part-1", "codeLine": 26},
+    {"time": 3.177, "diagramCell": "f0-n5-part-1", "codeLine": 25}
+  ]
+}
