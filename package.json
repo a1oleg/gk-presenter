@@ -9,7 +9,10 @@
     "scene:check": "node scripts/stage-scene.mjs --action check",
     "test": "node --test",
     "render:serve": "node scripts/serve-render.mjs",
-    "check": "node src/check-lesson.mjs examples/lesson.json"
+    "check": "node src/check-lesson.mjs examples/lesson.json",
+    "produce": "node scripts/produce.mjs"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  }
 }

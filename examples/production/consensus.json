@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "title": "Consensus: silent production fixture",
+  "profile": {
+    "language": "en",
+    "audience": "Pipeline reviewers"
+  },
+  "evidence": [
+    {
+      "id": "e1",
+      "kind": "visual",
+      "locator": "fixture://production-demo",
+      "revision": "1"
+    }
+  ],
+  "claims": [
+    {
+      "id": "c1",
+      "text": "Form a hypothesis.",
+      "evidenceIds": [
+        "e1"
+      ]
+    },
+    {
+      "id": "c2",
+      "text": "Run a test and review the result.",
+      "evidenceIds": [
+        "e1"
+      ]
+    }
+  ],
+  "production": {
+    "version": 1,
+    "canvas": {
+      "width": 480,
+      "height": 270,
+      "fps": 30
+    },
+    "background": "#172536",
+    "font": "C:/Windows/Fonts/arial.ttf"
+  },
+  "segments": [
+    {
+      "id": "scene-1",
+      "narration": "Form a hypothesis.",
+      "claimIds": [
+        "c1"
+      ],
+      "targetSeconds": 1,
+      "visual": {
+        "kind": "title",
+        "instruction": "Show the authored demo text; this fixture is silent.",
+        "evidenceIds": [
+          "e1"
+        ]
+      },
+      "render": {
+        "background": {
+          "kind": "solid"
+        },
+        "audio": {
+          "mode": "silent"
+        },
+        "durationSeconds": 1,
+        "tailSeconds": 0,
+        "overlays": [
+          {
+            "kind": "text",
+            "text": "Consensus research",
+            "x": 0.07,
+            "y": 0.12,
+            "size": 22,
+            "color": "#FFFFFF"
+          },
+          {
+            "kind": "text",
+            "text": "Form a hypothesis.",
+            "x": 0.07,
+            "y": 0.4,
+            "size": 14,
+            "color": "#B6D2EF"
+          },
+          {
+            "kind": "pointer",
+            "x": 0.08,
+            "y": 0.75,
+            "size": 16,
+            "color": "#F7B955",
+            "start": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "scene-2",
+      "narration": "Run a test and review the result.",
+      "claimIds": [
+        "c2"
+      ],
+      "targetSeconds": 1,
+      "visual": {
+        "kind": "title",
+        "instruction": "Show the authored demo text; this fixture is silent.",
+        "evidenceIds": [
+          "e1"
+        ]
+      },
+      "render": {
+        "background": {
+          "kind": "solid"
+        },
+        "audio": {
+          "mode": "silent"
+        },
+        "durationSeconds": 1,
+        "tailSeconds": 0,
+        "overlays": [
+          {
+            "kind": "text",
+            "text": "Evidence",
+            "x": 0.07,
+            "y": 0.12,
+            "size": 22,
+            "color": "#FFFFFF"
+          },
+          {
+            "kind": "text",
+            "text": "Run a test and review the result.",
+            "x": 0.07,
+            "y": 0.4,
+            "size": 14,
+            "color": "#B6D2EF"
+          },
+          {
+            "kind": "pointer",
+            "x": 0.08,
+            "y": 0.75,
+            "size": 16,
+            "color": "#F7B955",
+            "start": 0.5
+          }
+        ]
+      }
+    }
+  ]
+}
