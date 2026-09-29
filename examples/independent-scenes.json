@@ -1,0 +1,15 @@
+{
+  "canvas": {"width": 1920, "height": 1080, "fps": 30},
+  "durationSeconds": 5,
+  "diagramImage": "assets/diagram/scene.png",
+  "diagramGeometry": "assets/diagram/screen-geometry.json",
+  "codeSnapshot": "assets/code-source.json",
+  "font": "C:/Windows/Fonts/consola.ttf",
+  "codeFontSize": 30,
+  "minimumCodeFontSize": 18,
+  "tracks": {
+    "diagram": {"x": 24, "y": 24, "width": 920, "height": 1032},
+    "code": {"x": 976, "y": 24, "width": 920, "height": 1032}
+  },
+  "events": []
+}
